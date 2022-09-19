@@ -1,17 +1,16 @@
-
-use std::fmt::Display;
-
+use crate::models::Error;
 use reqwest::Client;
+use std::fmt::Display;
 use todel::models::{Info, Message};
 
-const REST_URL: &'static str = "https://eludris.tooty.xyz";
+/// The default rest url
+pub const REST_URL: &'static str = "https://eludris.tooty.xyz";
 
-type Error<T> = Result<T, Box<dyn std::error::Error + Send + Sync>>;
-
+/// Simple Http client
 #[derive(Debug)]
 pub struct HttpClient {
     client: Client,
-    rest_url: String,
+    pub rest_url: String,
     pub user_name: Option<String>,
 }
 
@@ -26,24 +25,47 @@ impl Default for HttpClient {
 }
 
 impl HttpClient {
+    /// Create a new HttpClient
     pub fn new() -> HttpClient {
         HttpClient::default()
     }
 
+    /// Change the [`HttpClient::user_name`] of the HttpClient
+    ///
+    /// # Example:
+    /// ```rust
+    /// use uwuki::HttpClient;
+    ///
+    /// let client = HttpClient::new().name("Uwuki".to_string());
+    ///
+    /// assert_eq!(client.user_name, Some("Uwuki".to_string()))
+    /// ```
     pub fn name(mut self, name: String) -> HttpClient {
         self.user_name = Some(name);
         self
     }
 
+    /// Change the url of the HttpClient
+    ///
+    /// # Example:
+    /// ```rust
+    /// use uwuki::HttpClient;
+    ///
+    /// let client = HttpClient::new().rest_url("http://0.0.0.0:7159".to_string());
+    ///
+    /// assert_eq!(client.rest_url, "http://0.0.0.0:7159".to_string())
+    /// ```
     pub fn rest_url(mut self, url: String) -> HttpClient {
         self.rest_url = url;
         self
     }
 
-    pub async fn get_instance_info(&self) -> Error<Info> {
+    /// Fetch the info payload of an instance
+    pub async fn fetch_instance_info(&self) -> Error<Info> {
         Ok(self.client.get(&self.rest_url).send().await?.json().await?)
     }
 
+    /// Send a message supplying both an author name and content
     pub async fn send_message<T: Display, C: Display>(
         &self,
         author: T,
@@ -62,6 +84,11 @@ impl HttpClient {
             .await?)
     }
 
+    /// Send a message using the client's [`HttpClient::user_name`]
+    ///
+    /// # Panics
+    ///
+    /// This function can panic if there is no name set by the [`HttpClient::name`] function
     pub async fn send<T: Display>(&self, content: T) -> Error<Message> {
         self.send_message(
             &self
