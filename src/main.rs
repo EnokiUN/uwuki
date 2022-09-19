@@ -4,6 +4,9 @@ use uwuki::{GatewayClient, HttpClient};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    dotenv::dotenv().ok();
+    env_logger::init();
+
     let client = HttpClient::new().name("Uwuki".to_string());
     let gateway = GatewayClient::new();
     let mut events = gateway.get_events().await?;
