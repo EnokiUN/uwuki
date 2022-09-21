@@ -4,7 +4,7 @@ use std::fmt::Display;
 use todel::models::{Info, Message};
 
 /// The default rest url
-pub const REST_URL: &'static str = "https://eludris.tooty.xyz";
+pub const REST_URL: &str = "https://eludris.tooty.xyz";
 
 /// Simple Http client
 #[derive(Debug)]

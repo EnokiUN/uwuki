@@ -14,7 +14,7 @@ use tokio_tungstenite::{
 use crate::models::Error;
 
 /// The default gateway url
-pub const GATEWAY_URL: &'static str = "wss://eludris.tooty.xyz/ws/";
+pub const GATEWAY_URL: &str = "wss://eludris.tooty.xyz/ws/";
 
 /// A Stream of Pandemonium events
 #[derive(Debug)]
