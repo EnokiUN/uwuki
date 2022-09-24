@@ -1,10 +1,10 @@
 # Environment variables
-.env
-
-# KeyDB data
-dump.rdb
-
-
-# Added by cargo
-
-/target
+         .env         
+                      
+     # KeyDB data     
+       dump.rdb       
+                      
+                      
+   # Added by cargo   
+                      
+/target        
