@@ -13,7 +13,7 @@ pub fn get_arg(content: &mut String) -> String {
                 break;
             }
         } else if ch == '"' && quoted {
-            if !content.is_empty() {
+            if !content.is_empty() && content.chars().nth(0) == Some(' ') {
                 content.remove(0);
             }
             break;

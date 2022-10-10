@@ -37,10 +37,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .filter(|i| i.is_ok())
         .map(|i| i.unwrap().to_string())
         .collect::<Vec<String>>();
-        if msg.content.to_lowercase().contains("uwu") && msg.author != NAME {
+        if msg.content.trim().to_lowercase() == "uwu" && msg.author != NAME {
             client.send("UwU").await?;
-        }
-        if !issues.is_empty() {
+        } else if !issues.is_empty() {
             client.send(issues.join("\n")).await?;
         } else if msg.content.starts_with(PREFIX) {
             msg.content.drain(..PREFIX.len());
@@ -63,6 +62,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                                 client.send_message(author, content).await?;
                             }
                         }
+                    }
+                    "ban" => {
+                        client.send(format!("Banned {} :hammer:", args)).await?;
+                    }
+                    "unban" => {
+                        client.send(format!("unBanned {} un:hammer:", args)).await?;
                     }
                     _ => {}
                 },
