@@ -56,12 +56,12 @@ impl Github {
         Github::default()
     }
 
-    pub async fn get_issue(&self, repository: &str, issue: u32) -> Error<Issue> {
+    pub async fn get_issue(&self, user: &str, repository: &str, issue: u32) -> Error<Issue> {
         Ok(self
             .client
             .get(format!(
-                "{}/repos/eludris/{}/issues/{}",
-                API_URL, repository, issue,
+                "{}/repos/{}/{}/issues/{}",
+                API_URL, user, repository, issue,
             ))
             .header(USER_AGENT, "*The* Uwuki")
             .send()
