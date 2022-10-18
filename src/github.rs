@@ -29,15 +29,15 @@ pub struct Issue {
 
 impl Display for Issue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "```\n")?;
-        write!(f, "Number:     #{}\n", self.number)?;
-        write!(f, "Url:        {}\n", self.html_url)?;
-        write!(f, "State:      {}\n", self.state)?;
-        write!(f, "Title:      {}\n", self.title)?;
-        write!(f, "Author:     {}\n", self.user.login)?;
-        write!(f, "Comments:   {}\n", self.comments)?;
+        writeln!(f, "```\n")?;
+        writeln!(f, "Number:     #{}", self.number)?;
+        writeln!(f, "Url:        {}", self.html_url)?;
+        writeln!(f, "State:      {}", self.state)?;
+        writeln!(f, "Title:      {}", self.title)?;
+        writeln!(f, "Author:     {}", self.user.login)?;
+        writeln!(f, "Comments:   {}", self.comments)?;
         if let Some(body) = &self.body {
-            write!(f, "Body:\n{}\n", body)?;
+            writeln!(f, "Body:\n{}", body)?;
         }
         write!(f, "```")
     }
@@ -56,7 +56,7 @@ impl Github {
         Github::default()
     }
 
-    pub async fn get_issue(&self, repository: String, issue: u32) -> Error<Issue> {
+    pub async fn get_issue(&self, repository: &str, issue: u32) -> Error<Issue> {
         Ok(self
             .client
             .get(format!(
@@ -68,5 +68,33 @@ impl Github {
             .await?
             .json()
             .await?)
+    }
+
+    // TODO: refactor the return of this into a struct like Issue
+    pub async fn get_snippet(
+        &self,
+        user: &str,
+        repo: &str,
+        file: &str,
+        start: usize,
+        end: Option<usize>,
+    ) -> Error<String> {
+        let content = self
+            .client
+            .get(format!(
+                "https://raw.githubusercontent.com/{}/{}/{}",
+                user, repo, file
+            ))
+            .send()
+            .await?
+            .text()
+            .await?
+            .lines()
+            .skip(start - 1)
+            .take(end.map(|e| e - start + 1).unwrap_or(1))
+            .collect::<Vec<&str>>()
+            .join("\n");
+        let language = file.rsplit_once('.').map(|s| s.1).unwrap_or("");
+        Ok(format!("```{}\n{}\n```", language, content))
     }
 }

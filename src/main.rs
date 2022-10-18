@@ -24,11 +24,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     while let Some(mut msg) = events.next().await {
         lazy_static! {
-            static ref RE: Regex = Regex::new(r#"([a-zA-Z0-9_-]+)#(\d+)"#).unwrap();
+            static ref ISSUE_REGEX: Regex = Regex::new(r"([a-zA-Z0-9_-]+)#(\d+)").unwrap();
+            static ref SNIPPET_REGEX: Regex = Regex::new(r"https://github\.com/(?P<user>[a-zA-Z0-9_-]+)/(?P<repo>[a-zA-Z0-9_.-]+)/blob/(?P<file>[a-zA-Z0-9./_ -]+)#L(?P<start>\d+)(?:-L(?P<end>\d+))?").unwrap();
         }
-        let issues = join_all(RE.captures_iter(&msg.content).map(|c| {
+        let issues = join_all(ISSUE_REGEX.captures_iter(&msg.content).map(|c| {
             gh.get_issue(
-                c.get(1).unwrap().as_str().to_string(),
+                c.get(1).unwrap().as_str(),
                 c.get(2).unwrap().as_str().parse().unwrap(),
             )
         }))
@@ -37,10 +38,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .filter(|i| i.is_ok())
         .map(|i| i.unwrap().to_string())
         .collect::<Vec<String>>();
+        let snippets: Vec<String> = join_all(SNIPPET_REGEX.captures_iter(&msg.content).map(|c| {
+            gh.get_snippet(
+                c.name("user").unwrap().as_str(),
+                c.name("repo").unwrap().as_str(),
+                c.name("file").unwrap().as_str(),
+                c.name("start").unwrap().as_str().parse().unwrap(),
+                c.name("end").map(|c| c.as_str().parse().unwrap()),
+            )
+        }))
+        .await
+        .into_iter()
+        .filter_map(|s| s.ok())
+        .collect();
         if msg.content.trim().to_lowercase() == "uwu" && msg.author != NAME {
             client.send("UwU").await?;
         } else if !issues.is_empty() {
             client.send(issues.join("\n")).await?;
+        } else if !snippets.is_empty() {
+            client.send(snippets.join("\n")).await?;
         } else if msg.content.starts_with(PREFIX) {
             msg.content.drain(..PREFIX.len());
             match msg.content.split_once(' ') {
@@ -55,12 +71,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                             client
                                 .send("The author name should be between 2-32 characters long *b..baka!* >//<")
                                 .await?;
+                        } else if content.is_empty() {
+                            client.send_message(args, "I am sus").await?;
                         } else {
-                            if content.is_empty() {
-                                client.send_message(args, "I am sus").await?;
-                            } else {
-                                client.send_message(author, content).await?;
-                            }
+                            client.send_message(author, content).await?;
                         }
                     }
                     "ban" => {
