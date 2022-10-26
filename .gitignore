@@ -7,4 +7,4 @@ dump.rdb
 
 # Added by cargo
 
-/target
+target/
