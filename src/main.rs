@@ -27,17 +27,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             static ref ISSUE_REGEX: Regex = Regex::new(r"(:?(?P<user>[a-zA-Z0-9_-]+)/)?(?P<repo>[a-zA-Z0-9_.-]+)#(?P<num>\d+)").unwrap();
             static ref SNIPPET_REGEX: Regex = Regex::new(r"https://github\.com/(?P<user>[a-zA-Z0-9_-]+)/(?P<repo>[a-zA-Z0-9_.-]+)/blob/(?P<file>[a-zA-Z0-9./_ -]+)#L(?P<start>\d+)(?:-L(?P<end>\d+))?").unwrap();
         }
-        let issues = join_all(
-            ISSUE_REGEX
-                .captures_iter(&msg.content)
-                .map(|c| {
-                    gh.get_issue(
-                        c.name("user").map(|c| c.as_str()).unwrap_or("eludris"),
-                        c.name("repo").unwrap().as_str(),
-                        c.name("num").unwrap().as_str().parse().unwrap(),
-                    )
-                }),
-        )
+        let issues = join_all(ISSUE_REGEX.captures_iter(&msg.content).map(|c| {
+            gh.get_issue(
+                c.name("user").map(|c| c.as_str()).unwrap_or("eludris"),
+                c.name("repo").unwrap().as_str(),
+                c.name("num").unwrap().as_str().parse().unwrap(),
+            )
+        }))
         .await
         .into_iter()
         .filter(|i| i.is_ok())
@@ -87,6 +83,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                     }
                     "unban" => {
                         client.send(format!("unBanned {} un:hammer:", args)).await?;
+                    }
+                    "bonk" => {
+                        client.send(format!("Bonkned {} :hammer:", args)).await?;
+                    }
+                    "unbonk" => {
+                        client
+                            .send(format!("unBonkned {} un:hammer:", args))
+                            .await?;
                     }
                     _ => {}
                 },
