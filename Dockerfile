@@ -3,9 +3,10 @@ FROM rust:slim-buster as builder
 RUN USER=root cargo new --bin uwuki
 WORKDIR /uwuki
 
-COPY Cargo.lock Cargo.toml ./
-
 RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
+
+COPY Cargo.lock Cargo.toml ./
+COPY uwuki_macros ./uwuki_macros
 
 RUN cargo build --release
 RUN rm src/*.rs
