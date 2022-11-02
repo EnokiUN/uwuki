@@ -1,4 +1,5 @@
 use std::{
+    convert::Infallible,
     pin::Pin,
     task::{Context, Poll},
     time::Duration,
@@ -6,7 +7,7 @@ use std::{
 
 use futures::{stream::SplitStream, SinkExt, Stream, StreamExt};
 use todel::models::Message;
-use tokio::{net::TcpStream, spawn, time};
+use tokio::{net::TcpStream, task::JoinHandle, time};
 use tokio_tungstenite::{
     connect_async, tungstenite::Message as WSMessage, MaybeTlsStream, WebSocketStream,
 };
@@ -18,7 +19,11 @@ pub const GATEWAY_URL: &str = "wss://eludris.tooty.xyz/ws/";
 
 /// A Stream of Pandemonium events
 #[derive(Debug)]
-pub struct Events(SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>);
+pub struct Events {
+    gateway_url: String,
+    rx: SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>,
+    ping: JoinHandle<Infallible>,
+}
 
 /// Simple gateway client
 #[derive(Debug)]
@@ -59,7 +64,7 @@ impl GatewayClient {
     pub async fn get_events(&self) -> Error<Events> {
         let (socket, _) = connect_async(&self.gateway_url).await?;
         let (mut tx, rx) = socket.split();
-        spawn(async move {
+        let ping = tokio::spawn(async move {
             loop {
                 tx.send(WSMessage::Ping(vec![]))
                     .await
@@ -67,7 +72,11 @@ impl GatewayClient {
                 time::sleep(Duration::from_secs(20)).await;
             }
         });
-        Ok(Events(rx))
+        Ok(Events {
+            gateway_url: self.gateway_url.clone(),
+            rx,
+            ping,
+        })
     }
 }
 
@@ -76,15 +85,21 @@ impl Stream for Events {
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         loop {
-            match self.0.poll_next_unpin(cx) {
-                Poll::Ready(msg) => {
-                    if let Some(Ok(WSMessage::Text(msg))) = msg {
+            match self.rx.poll_next_unpin(cx) {
+                Poll::Ready(Some(Ok(msg))) => match msg {
+                    WSMessage::Text(msg) => {
                         if let Ok(msg) = serde_json::from_str(&msg) {
                             break Poll::Ready(Some(msg));
                         }
                     }
-                }
+                    WSMessage::Close(_) => {
+                        self.ping.abort();
+                        break Poll::Ready(None);
+                    }
+                    _ => {}
+                },
                 Poll::Pending => break Poll::Pending,
+                _ => {}
             }
         }
     }
