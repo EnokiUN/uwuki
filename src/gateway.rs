@@ -20,7 +20,6 @@ pub const GATEWAY_URL: &str = "wss://eludris.tooty.xyz/ws/";
 /// A Stream of Pandemonium events
 #[derive(Debug)]
 pub struct Events {
-    gateway_url: String,
     rx: SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>,
     ping: JoinHandle<Infallible>,
 }
@@ -72,11 +71,7 @@ impl GatewayClient {
                 time::sleep(Duration::from_secs(20)).await;
             }
         });
-        Ok(Events {
-            gateway_url: self.gateway_url.clone(),
-            rx,
-            ping,
-        })
+        Ok(Events { rx, ping })
     }
 }
 
