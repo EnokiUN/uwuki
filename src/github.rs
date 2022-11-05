@@ -70,7 +70,7 @@ impl Github {
             .await?)
     }
 
-    // TODO: refactor the return of this into a struct like Issue
+    // After some thought, this is *perfect*
     pub async fn get_snippet(
         &self,
         user: &str,
