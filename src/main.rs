@@ -74,7 +74,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                                 .send("The author name should be between 2-32 characters long *b..baka!* >//<")
                                 .await?;
                         } else if content.is_empty() {
-                            client.send_message(args, "I am sus").await?;
+                            client.send_message(author, "I am sus").await?;
                         } else {
                             client.send_message(author, content).await?;
                         }
