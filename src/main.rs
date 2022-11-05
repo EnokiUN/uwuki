@@ -1,8 +1,6 @@
 mod github;
 mod utils;
 
-use std::env;
-
 use futures::{future::join_all, stream::StreamExt};
 use lazy_static::lazy_static;
 use regex::Regex;
