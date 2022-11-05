@@ -44,7 +44,6 @@ impl GatewayClient {
     pub fn new() -> GatewayClient {
         GatewayClient::default()
     }
-
     /// Change the url of the GatewayClient
     ///
     /// # Example:
@@ -76,6 +75,7 @@ impl Events {
             ping: None,
         }
     }
+
     async fn connect(&mut self) -> Error<()> {
         log::debug!("Events connecting");
         if let Some(ping) = &self.ping {
