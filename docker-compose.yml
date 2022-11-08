@@ -1,6 +1,6 @@
-               version: "3"
+version: "3"               
                            
-                  services:
-                   uwuki:  
-               build: .    
+services:                  
+uwuki:                     
+build: .                   
 restart: unless-stopped    
