@@ -24,10 +24,31 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let mut events = gateway.get_events().await?;
 
     while let Some(mut msg) = events.next().await {
+        if msg.author == NAME {
+            continue;
+        }
+
         lazy_static! {
+            static ref REPO_REGEX: Regex = Regex::new(r"(?P<ignore>!)?(?P<user>[a-zA-Z0-9_-]+)/(?P<repo>[a-zA-Z0-9_.-]+)").unwrap();
             static ref ISSUE_REGEX: Regex = Regex::new(r"(:?(?P<user>[a-zA-Z0-9_-]+)/)?(?P<repo>[a-zA-Z0-9_.-]+)#(?P<num>\d+)").unwrap();
             static ref SNIPPET_REGEX: Regex = Regex::new(r"https://github\.com/(?P<user>[a-zA-Z0-9_-]+)/(?P<repo>[a-zA-Z0-9_.-]+)/blob/(?P<file>[a-zA-Z0-9./_ -]+)#L(?P<start>\d+)(?:-L(?P<end>\d+))?").unwrap();
         }
+        let mut repos = join_all(
+            REPO_REGEX
+                .captures_iter(&msg.content)
+                .filter(|c| c.name("ignore").is_none())
+                .map(|c| {
+                    gh.get_repo(
+                        c.name("user").unwrap().as_str(),
+                        c.name("repo").unwrap().as_str(),
+                    )
+                }),
+        )
+        .await
+        .into_iter()
+        .filter(|i| i.is_ok())
+        .map(|i| i.unwrap().to_string())
+        .collect::<Vec<String>>();
         let mut issues = join_all(ISSUE_REGEX.captures_iter(&msg.content).map(|c| {
             gh.get_issue(
                 c.name("user").map(|c| c.as_str()).unwrap_or("eludris"),
@@ -56,9 +77,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             .collect();
 
         let mut blocks = Vec::new();
+        blocks.append(&mut repos);
         blocks.append(&mut issues);
         blocks.append(&mut snippets);
-        if msg.content.trim().to_lowercase() == "uwu" && msg.author != NAME {
+        if msg.content.trim().to_lowercase() == "uwu" {
             client.send("UwU").await?;
         } else if !blocks.is_empty() {
             client.send(blocks.join("\n")).await?;
