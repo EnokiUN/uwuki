@@ -28,7 +28,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             static ref ISSUE_REGEX: Regex = Regex::new(r"(:?(?P<user>[a-zA-Z0-9_-]+)/)?(?P<repo>[a-zA-Z0-9_.-]+)#(?P<num>\d+)").unwrap();
             static ref SNIPPET_REGEX: Regex = Regex::new(r"https://github\.com/(?P<user>[a-zA-Z0-9_-]+)/(?P<repo>[a-zA-Z0-9_.-]+)/blob/(?P<file>[a-zA-Z0-9./_ -]+)#L(?P<start>\d+)(?:-L(?P<end>\d+))?").unwrap();
         }
-        let issues = join_all(ISSUE_REGEX.captures_iter(&msg.content).map(|c| {
+        let mut issues = join_all(ISSUE_REGEX.captures_iter(&msg.content).map(|c| {
             gh.get_issue(
                 c.name("user").map(|c| c.as_str()).unwrap_or("eludris"),
                 c.name("repo").unwrap().as_str(),
@@ -40,25 +40,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .filter(|i| i.is_ok())
         .map(|i| i.unwrap().to_string())
         .collect::<Vec<String>>();
-        let snippets: Vec<String> = join_all(SNIPPET_REGEX.captures_iter(&msg.content).map(|c| {
-            gh.get_snippet(
-                c.name("user").unwrap().as_str(),
-                c.name("repo").unwrap().as_str(),
-                c.name("file").unwrap().as_str(),
-                c.name("start").unwrap().as_str().parse().unwrap(),
-                c.name("end").map(|c| c.as_str().parse().unwrap()),
-            )
-        }))
-        .await
-        .into_iter()
-        .filter_map(|s| s.ok())
-        .collect();
+        let mut snippets: Vec<String> =
+            join_all(SNIPPET_REGEX.captures_iter(&msg.content).map(|c| {
+                gh.get_snippet(
+                    c.name("user").unwrap().as_str(),
+                    c.name("repo").unwrap().as_str(),
+                    c.name("file").unwrap().as_str(),
+                    c.name("start").unwrap().as_str().parse().unwrap(),
+                    c.name("end").map(|c| c.as_str().parse().unwrap()),
+                )
+            }))
+            .await
+            .into_iter()
+            .filter_map(|s| s.ok())
+            .collect();
+
+        let mut blocks = Vec::new();
+        blocks.append(&mut issues);
+        blocks.append(&mut snippets);
         if msg.content.trim().to_lowercase() == "uwu" && msg.author != NAME {
             client.send("UwU").await?;
-        } else if !issues.is_empty() {
-            client.send(issues.join("\n")).await?;
-        } else if !snippets.is_empty() {
-            client.send(snippets.join("\n")).await?;
+        } else if !blocks.is_empty() {
+            client.send(blocks.join("\n")).await?;
         } else if msg.content.starts_with(PREFIX) {
             msg.content.drain(..PREFIX.len());
             match msg.content.split_once(' ') {
