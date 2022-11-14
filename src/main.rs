@@ -1,6 +1,8 @@
 mod github;
 mod utils;
 
+use std::{collections::HashSet, env};
+
 use futures::{future::join_all, stream::StreamExt};
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -19,7 +21,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let client = HttpClient::new().name(NAME.to_string());
     let gateway = GatewayClient::new();
-    let gh = Github::new();
+    let gh = Github::new(
+        env::var("GITHUB_TOKEN").expect("Could not find the \"GITHUB_TOKEN\" environment variable"),
+    );
 
     let mut events = gateway.get_events().await?;
 
@@ -38,43 +42,61 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 .captures_iter(&msg.content)
                 .filter(|c| c.name("ignore").is_none())
                 .map(|c| {
-                    gh.get_repo(
+                    (
                         c.name("user").unwrap().as_str(),
                         c.name("repo").unwrap().as_str(),
                     )
-                }),
+                })
+                .collect::<HashSet<(&str, &str)>>()
+                .into_iter()
+                .map(|(user, repo)| gh.get_repo(user, repo)),
         )
         .await
         .into_iter()
         .filter(|i| i.is_ok())
         .map(|i| i.unwrap().to_string())
         .collect::<Vec<String>>();
-        let mut issues = join_all(ISSUE_REGEX.captures_iter(&msg.content).map(|c| {
-            gh.get_issue(
-                c.name("user").map(|c| c.as_str()).unwrap_or("eludris"),
-                c.name("repo").unwrap().as_str(),
-                c.name("num").unwrap().as_str().parse().unwrap(),
-            )
-        }))
+
+        let mut issues = join_all(
+            ISSUE_REGEX
+                .captures_iter(&msg.content)
+                .map(|c| {
+                    (
+                        c.name("user").map(|c| c.as_str()).unwrap_or("eludris"),
+                        c.name("repo").unwrap().as_str(),
+                        c.name("num").unwrap().as_str().parse().unwrap(),
+                    )
+                })
+                .collect::<HashSet<(&str, &str, u32)>>()
+                .into_iter()
+                .map(|(user, repo, num)| gh.get_issue(user, repo, num)),
+        )
         .await
         .into_iter()
         .filter(|i| i.is_ok())
         .map(|i| i.unwrap().to_string())
         .collect::<Vec<String>>();
-        let mut snippets: Vec<String> =
-            join_all(SNIPPET_REGEX.captures_iter(&msg.content).map(|c| {
-                gh.get_snippet(
-                    c.name("user").unwrap().as_str(),
-                    c.name("repo").unwrap().as_str(),
-                    c.name("file").unwrap().as_str(),
-                    c.name("start").unwrap().as_str().parse().unwrap(),
-                    c.name("end").map(|c| c.as_str().parse().unwrap()),
-                )
-            }))
-            .await
-            .into_iter()
-            .filter_map(|s| s.ok())
-            .collect();
+
+        let mut snippets: Vec<String> = join_all(
+            SNIPPET_REGEX
+                .captures_iter(&msg.content)
+                .map(|c| {
+                    (
+                        c.name("user").unwrap().as_str(),
+                        c.name("repo").unwrap().as_str(),
+                        c.name("file").unwrap().as_str(),
+                        c.name("start").unwrap().as_str().parse().unwrap(),
+                        c.name("end").map(|c| c.as_str().parse().unwrap()),
+                    )
+                })
+                .collect::<HashSet<(&str, &str, &str, u32, Option<u32>)>>()
+                .into_iter()
+                .map(|(user, repo, file, start, end)| gh.get_snippet(user, repo, file, start, end)),
+        )
+        .await
+        .into_iter()
+        .filter_map(|s| s.ok())
+        .collect();
 
         let mut blocks = Vec::new();
         blocks.append(&mut repos);

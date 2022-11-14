@@ -3,4 +3,5 @@ version: "3"
 services:
   uwuki:
     build: .
+    env_file: .env
     restart: unless-stopped

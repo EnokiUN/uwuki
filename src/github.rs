@@ -9,6 +9,7 @@ pub type Error<T> = Result<T, Box<dyn std::error::Error + Send + Sync>>;
 #[derive(Debug)]
 pub struct Github {
     client: Client,
+    token: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -88,17 +89,12 @@ impl Display for Repository {
     }
 }
 
-impl Default for Github {
-    fn default() -> Self {
-        Github {
-            client: Client::new(),
-        }
-    }
-}
-
 impl Github {
-    pub fn new() -> Github {
-        Github::default()
+    pub fn new(token: String) -> Self {
+        Self {
+            client: Client::new(),
+            token,
+        }
     }
 
     pub async fn get_issue(&self, user: &str, repository: &str, issue: u32) -> Error<Issue> {
@@ -108,6 +104,7 @@ impl Github {
                 "{}/repos/{}/{}/issues/{}",
                 API_URL, user, repository, issue,
             ))
+            .bearer_auth(&self.token)
             .header(USER_AGENT, "*The* Uwuki")
             .send()
             .await?
@@ -119,6 +116,7 @@ impl Github {
         Ok(self
             .client
             .get(format!("{}/repos/{}/{}", API_URL, user, repository))
+            .bearer_auth(&self.token)
             .header(USER_AGENT, "*The* Uwuki")
             .send()
             .await?
@@ -132,8 +130,8 @@ impl Github {
         user: &str,
         repo: &str,
         file: &str,
-        start: usize,
-        end: Option<usize>,
+        start: u32,
+        end: Option<u32>,
     ) -> Error<String> {
         let content = self
             .client
@@ -141,13 +139,15 @@ impl Github {
                 "https://raw.githubusercontent.com/{}/{}/{}",
                 user, repo, file
             ))
+            .bearer_auth(&self.token)
+            .header(USER_AGENT, "*The* Uwuki")
             .send()
             .await?
             .text()
             .await?
             .lines()
-            .skip(start - 1)
-            .take(end.map(|e| e - start + 1).unwrap_or(1))
+            .skip(start as usize - 1)
+            .take(end.map(|e| e as usize - start as usize + 1).unwrap_or(1))
             .collect::<Vec<&str>>()
             .join("\n");
         let language = file.rsplit_once('.').map(|s| s.1).unwrap_or("");
