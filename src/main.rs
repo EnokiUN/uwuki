@@ -7,9 +7,9 @@ use futures::{future::join_all, stream::StreamExt};
 use lazy_static::lazy_static;
 use regex::Regex;
 
+use eludrs::{GatewayClient, HttpClient};
 use github::*;
 use utils::*;
-use uwuki::{GatewayClient, HttpClient};
 
 const PREFIX: &str = "uwu ";
 const NAME: &str = "Uwuki";
