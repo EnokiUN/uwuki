@@ -72,7 +72,9 @@ impl Display for Repository {
         writeln!(f, "{}", self.name)?;
         writeln!(f, "Url:            {}", self.url)?;
         if let Some(homepage) = &self.homepage {
-            writeln!(f, "Homepage:       {}", homepage)?;
+            if !homepage.is_empty() {
+                writeln!(f, "Homepage:       {}", homepage)?;
+            }
         }
         if let Some(description) = &self.description {
             writeln!(f, "Description:    {}", description)?;
