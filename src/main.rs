@@ -21,9 +21,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let client = HttpClient::new().name(NAME.to_string());
     let gateway = GatewayClient::new();
-    let gh = Github::new(
-        env::var("GITHUB_TOKEN").expect("Could not find the \"GITHUB_TOKEN\" environment variable"),
-    );
+    let gh = Github::new(env::var("GITHUB_TOKEN").ok());
 
     let mut events = gateway.get_events().await?;
 
@@ -102,6 +100,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         blocks.append(&mut repos);
         blocks.append(&mut issues);
         blocks.append(&mut snippets);
+
         if msg.content.trim().to_lowercase() == "uwu" {
             client.send("UwU").await?;
         } else if msg.content.trim().to_lowercase() == "!speed" {

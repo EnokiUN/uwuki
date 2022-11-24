@@ -9,7 +9,7 @@ pub type Error<T> = Result<T, Box<dyn std::error::Error + Send + Sync>>;
 #[derive(Debug)]
 pub struct Github {
     client: Client,
-    token: String,
+    token: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -92,7 +92,7 @@ impl Display for Repository {
 }
 
 impl Github {
-    pub fn new(token: String) -> Self {
+    pub fn new(token: Option<String>) -> Self {
         Self {
             client: Client::new(),
             token,
@@ -100,30 +100,32 @@ impl Github {
     }
 
     pub async fn get_issue(&self, user: &str, repository: &str, issue: u32) -> Error<Issue> {
-        Ok(self
+        let builder = self
             .client
             .get(format!(
                 "{}/repos/{}/{}/issues/{}",
                 API_URL, user, repository, issue,
             ))
-            .bearer_auth(&self.token)
-            .header(USER_AGENT, "*The* Uwuki")
-            .send()
-            .await?
-            .json()
-            .await?)
+            .header(USER_AGENT, "*The* Uwuki");
+        let builder = if let Some(token) = &self.token {
+            builder.bearer_auth(token)
+        } else {
+            builder
+        };
+        Ok(builder.send().await?.json().await?)
     }
 
     pub async fn get_repo(&self, user: &str, repository: &str) -> Error<Repository> {
-        Ok(self
+        let builder = self
             .client
             .get(format!("{}/repos/{}/{}", API_URL, user, repository))
-            .bearer_auth(&self.token)
-            .header(USER_AGENT, "*The* Uwuki")
-            .send()
-            .await?
-            .json()
-            .await?)
+            .header(USER_AGENT, "*The* Uwuki");
+        let builder = if let Some(token) = &self.token {
+            builder.bearer_auth(token)
+        } else {
+            builder
+        };
+        Ok(builder.send().await?.json().await?)
     }
 
     // After some thought, this is *perfect*
@@ -135,14 +137,19 @@ impl Github {
         start: u32,
         end: Option<u32>,
     ) -> Error<String> {
-        let content = self
+        let builder = self
             .client
             .get(format!(
                 "https://raw.githubusercontent.com/{}/{}/{}",
                 user, repo, file
             ))
-            .bearer_auth(&self.token)
-            .header(USER_AGENT, "*The* Uwuki")
+            .header(USER_AGENT, "*The* Uwuki");
+        let builder = if let Some(token) = &self.token {
+            builder.bearer_auth(token)
+        } else {
+            builder
+        };
+        let content = builder
             .send()
             .await?
             .text()
