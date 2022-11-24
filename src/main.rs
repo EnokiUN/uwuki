@@ -190,7 +190,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 ("throw", Some(args)) => {
                     client
                         .send(format!(
-                            "unthrew a(n) {}! (superior argument handling BTW)",
+                            "Unthrew a(n) {}! (superior argument handling BTW)",
                             args
                         ))
                         .await?;
