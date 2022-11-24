@@ -12,6 +12,7 @@ use github::*;
 use utils::*;
 
 const PREFIX: &str = "uwu ";
+const VELUM_PREFIX: &str = "!";
 const NAME: &str = "Uwuki";
 
 #[tokio::main]
@@ -103,8 +104,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
         if msg.content.trim().to_lowercase() == "uwu" {
             client.send("UwU").await?;
-        } else if msg.content.trim().to_lowercase() == "!speed" {
-            client.send("I am the faster.").await?;
         } else if !blocks.is_empty() {
             client.send(blocks.join("\n")).await?;
         } else if msg.content.starts_with(PREFIX) {
@@ -168,9 +167,31 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                     _ => {}
                 },
             }
+
+        // ---------- sharp trollage ----------
+        } else if msg.content.starts_with(VELUM_PREFIX) {
+            msg.content.drain(..VELUM_PREFIX.len());
+            match msg.content.split_once(' ') {
+                Some(_) => {}
+                None => match msg.content.as_ref() {
+                    "speed" => {
+                        client.send("I am the faster.").await?;
+                    }
+                    "maths" => {
+                        client.send("Enoki is 9 feet longer than Sharp").await?;
+                    }
+                    "help" => {
+                        client.send("Imagine no help command L (UwU)").await?;
+                    }
+                    "lmao" => {
+                        client.send("lmaon't").await?;
+                    }
+
                     _ => {}
                 },
             }
+        } else if msg.content.trim() == "I am the fastest." {
+            client.send("I am the even fasterer.").await?;
         }
     }
 
