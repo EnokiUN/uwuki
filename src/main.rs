@@ -104,6 +104,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         blocks.append(&mut snippets);
         if msg.content.trim().to_lowercase() == "uwu" {
             client.send("UwU").await?;
+        } else if msg.content.trim().to_lowercase() == "!speed" {
+            client.send("I am the faster.").await?;
         } else if !blocks.is_empty() {
             client.send(blocks.join("\n")).await?;
         } else if msg.content.starts_with(PREFIX) {
