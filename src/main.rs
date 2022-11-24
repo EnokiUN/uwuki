@@ -150,6 +150,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                     "info" => {
                         client.send("wot").await?;
                     }
+                    "help" => {
+                        client
+                            .send(concat!(
+                                "commands: say <text>, ",
+                                "imposter <author> [text], ",
+                                "ban <user>, ",
+                                "unban <user>, ",
+                                "bonk <user>, ",
+                                "unbonk <user>, ",
+                                "waa, ",
+                                "info, ",
+                                "help"
+                            ))
+                            .await?;
+                    }
+                    _ => {}
+                },
+            }
                     _ => {}
                 },
             }
