@@ -148,7 +148,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                     client.send("desuwa!").await?;
                 }
                 ("info", _) => {
-                    client.send("wot").await?;
+                    client.send("https://eludris.pages.dev").await?;
+                }
+                ("docs", _) => {
+                    client.send("https://eludris.github.io/docs").await?;
                 }
                 ("help", _) => {
                     client
