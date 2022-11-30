@@ -2,6 +2,7 @@
 name = "uwuki"
 version = "0.1.0"
 edition = "2021"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -15,7 +16,6 @@ regex = "1.6.0"
 reqwest = { version = "0.11.11", features = ["json"] }
 serde = { version = "1.0.144", features = ["derive"] }
 serde_json = "1.0.85"
-todel = { git = "https://github.com/eludris/todel" }
 tokio = { version = "1.21.1", features = ["rt-multi-thread", "macros"] }
-eludrs = { version = "0.1.0", git = "https://github.com/enokiun/eludrs" }
+eludrs = { version = "0.1.0", path = "../eludrs" }
 uwuki_macros = { path = "./uwuki_macros" }
