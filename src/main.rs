@@ -20,10 +20,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     dotenvy::dotenv().ok();
     env_logger::init();
 
-    let client = HttpClient::new()
-        .name(NAME.to_string())
-        .rest_url("https://eludris.tooty.xyz/next".to_string());
-    let gateway = GatewayClient::new().gateway_url("wss://eludris.tooty.xyz/next/ws/".to_string());
+    let client = HttpClient::new().name(NAME.to_string());
+    let gateway = GatewayClient::new();
     let gh = Github::new(env::var("GITHUB_TOKEN").ok());
 
     let mut events = gateway.get_events().await?;
