@@ -267,6 +267,7 @@ dependencies = [
 [[package]]
 name = "eludrs"
 version = "0.1.0"
+source = "git+https://github.com/enokiun/eludrs#b8468cba3d12596e7782fdf26bdc163d58c67899"
 dependencies = [
  "futures",
  "log",
