@@ -100,6 +100,7 @@ impl Github {
     }
 
     pub async fn get_issue(&self, user: &str, repository: &str, issue: u32) -> Error<Issue> {
+        log::debug!("Fetching issue {} at {}/{}", issue, user, repository);
         let builder = self
             .client
             .get(format!(
@@ -116,6 +117,7 @@ impl Github {
     }
 
     pub async fn get_repo(&self, user: &str, repository: &str) -> Error<Repository> {
+        log::debug!("Fetching repository {}/{}", user, repository);
         let builder = self
             .client
             .get(format!("{}/repos/{}/{}", API_URL, user, repository))
@@ -137,6 +139,14 @@ impl Github {
         start: u32,
         end: Option<u32>,
     ) -> Error<String> {
+        log::info!(
+            "Fetching code snippet at {}/{} in {} from lines {} to {:?}",
+            user,
+            repo,
+            file,
+            start,
+            end
+        );
         let builder = self
             .client
             .get(format!(

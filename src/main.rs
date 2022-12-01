@@ -59,13 +59,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let mut issues = join_all(
             ISSUE_REGEX
                 .captures_iter(&msg.content)
-                .map(|c| {
-                    (
-                        c.name("user").map(|c| c.as_str()).unwrap_or("eludris"),
+                .map(|c| match c.name("user") {
+                    Some(name) => vec![(
+                        name.as_str(),
                         c.name("repo").unwrap().as_str(),
                         c.name("num").unwrap().as_str().parse().unwrap(),
-                    )
+                    )],
+                    None => vec![
+                        (
+                            "eludris",
+                            c.name("repo").unwrap().as_str(),
+                            c.name("num").unwrap().as_str().parse().unwrap(),
+                        ),
+                        (
+                            "eludris-community",
+                            c.name("repo").unwrap().as_str(),
+                            c.name("num").unwrap().as_str().parse().unwrap(),
+                        ),
+                    ],
                 })
+                .flatten()
                 .collect::<HashSet<(&str, &str, u32)>>()
                 .into_iter()
                 .map(|(user, repo, num)| gh.get_issue(user, repo, num)),
@@ -153,6 +166,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 ("docs", _) => {
                     client.send("https://eludris.github.io/docs").await?;
                 }
+                ("awesome" | "awe", _) => {
+                    client.send("https://github.com/eludris/awesome").await?;
+                }
+                ("community", _) => {
+                    client.send("https://github.com/eludris-community").await?;
+                }
+                ("org", _) => {
+                    client.send("https://github.com/eludris").await?;
+                }
+                ("github" | "gh", _) => {
+                    client.send("https://github.com/eludris/eludris").await?;
+                }
                 ("help", _) => {
                     client
                         .send(concat!(
@@ -164,6 +189,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                             "unbonk <user>, ",
                             "waa, ",
                             "info, ",
+                            "docs, ",
+                            "awesome, ",
+                            "awe, ",
+                            "community, ",
+                            "org, ",
+                            "github, ",
+                            "gh, ",
                             "help"
                         ))
                         .await?;
