@@ -161,22 +161,32 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                     client.send("desuwa!").await?;
                 }
                 ("info", _) => {
-                    client.send("https://eludris.pages.dev").await?;
+                    client.send("<https://eludris.pages.dev>").await?;
+                }
+                ("blog", _) => {
+                    client.send("<https://eludris.pages.dev/blog>").await?;
                 }
                 ("docs", _) => {
                     client.send("https://eludris.github.io/docs").await?;
                 }
                 ("awesome" | "awe", _) => {
-                    client.send("https://github.com/eludris/awesome").await?;
+                    client.send("<https://github.com/eludris/awesome>").await?;
                 }
                 ("community", _) => {
-                    client.send("https://github.com/eludris-community").await?;
+                    client
+                        .send("<https://github.com/eludris-community>")
+                        .await?;
                 }
                 ("org", _) => {
-                    client.send("https://github.com/eludris").await?;
+                    client.send("<https://github.com/eludris>").await?;
                 }
-                ("github" | "gh", _) => {
-                    client.send("https://github.com/eludris/eludris").await?;
+                ("github" | "gh" | "repo", repo) => {
+                    client
+                        .send(format!(
+                            "<https://github.com/eludris/{}>",
+                            repo.unwrap_or("eludris").split(' ').next().unwrap()
+                        ))
+                        .await?;
                 }
                 ("stellar", _) => {
                     client
@@ -194,13 +204,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                             "unbonk <user>, ",
                             "waa, ",
                             "info, ",
+                            "blog, ",
                             "docs, ",
-                            "awesome, ",
-                            "awe, ",
+                            "awesome|awe, ",
                             "community, ",
                             "org, ",
-                            "github, ",
-                            "gh, ",
+                            "github|gh|repo [repo], ",
                             "stellar, ",
                             "help"
                         ))
