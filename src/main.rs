@@ -178,6 +178,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 ("github" | "gh", _) => {
                     client.send("https://github.com/eludris/eludris").await?;
                 }
+                ("stellar", _) => {
+                    client
+                        .send("<https://www.youtube.com/watch?v=a51VH9BYzZA>")
+                        .await?;
+                }
                 ("help", _) => {
                     client
                         .send(concat!(
@@ -196,6 +201,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                             "org, ",
                             "github, ",
                             "gh, ",
+                            "stellar, ",
                             "help"
                         ))
                         .await?;
