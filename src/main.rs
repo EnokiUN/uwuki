@@ -7,7 +7,7 @@ use futures::{future::join_all, stream::StreamExt};
 use lazy_static::lazy_static;
 use regex::Regex;
 
-use eludrs::{GatewayClient, HttpClient};
+use eludrs::HttpClient;
 use github::*;
 use utils::*;
 
@@ -20,8 +20,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     dotenvy::dotenv().ok();
     env_logger::init();
 
-    let client = HttpClient::new().name(NAME.to_string());
-    let gateway = GatewayClient::new();
+    let mut client = HttpClient::new().name(NAME.to_string());
+    let gateway = client.create_gateway().await?;
     let gh = Github::new(env::var("GITHUB_TOKEN").ok());
 
     let mut events = gateway.get_events().await?;
@@ -59,7 +59,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let mut issues = join_all(
             ISSUE_REGEX
                 .captures_iter(&msg.content)
-                .map(|c| match c.name("user") {
+                .flat_map(|c| match c.name("user") {
                     Some(name) => vec![(
                         name.as_str(),
                         c.name("repo").unwrap().as_str(),
@@ -78,7 +78,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                         ),
                     ],
                 })
-                .flatten()
                 .collect::<HashSet<(&str, &str, u32)>>()
                 .into_iter()
                 .map(|(user, repo, num)| gh.get_issue(user, repo, num)),
@@ -118,7 +117,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         if msg.content.trim().to_lowercase() == "uwu" {
             client.send("UwU").await?;
         } else if !blocks.is_empty() {
-            client.send(blocks.join("\n")).await?;
+            let content = blocks.join("\n");
+            if content.len() > client.get_instance_info().await?.message_limit {
+                client.send("Content too long uwu but sad").await?;
+            } else {
+                client.send(blocks.join("\n")).await?;
+            }
         } else if msg.content.starts_with(PREFIX) {
             msg.content.drain(..PREFIX.len());
             match msg

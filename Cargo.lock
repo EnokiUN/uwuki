@@ -21,6 +21,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.66"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "216261ddc8289130e551ddcd5ce8a064710c0d064a4d2895c67151c92b5443f6"
+
+[[package]]
 name = "atty"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -267,8 +273,8 @@ dependencies = [
 [[package]]
 name = "eludrs"
 version = "0.1.0"
-source = "git+https://github.com/eludris-community/eludrs#61a495b4eb4bcb02ffecdae2fd4d61830b258848"
 dependencies = [
+ "anyhow",
  "futures",
  "log",
  "reqwest",
@@ -1212,7 +1218,7 @@ checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
 [[package]]
 name = "todel"
 version = "0.3.0"
-source = "git+https://github.com/eludris/todel#076872db15f4e9d20698cda60f1f6120cfae67d0"
+source = "git+https://github.com/eludris/todel#3066be4393eabf689a15a82986d08e186e74f49b"
 dependencies = [
  "serde",
  "serde_with",
