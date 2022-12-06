@@ -1,14 +1,17 @@
 mod github;
+mod playground;
 mod utils;
 
 use std::{collections::HashSet, env};
 
 use futures::{future::join_all, stream::StreamExt};
 use lazy_static::lazy_static;
+use playground::Playground;
 use regex::Regex;
 
 use eludrs::HttpClient;
 use github::*;
+use playground::*;
 use utils::*;
 
 const PREFIX: &str = "uwu ";
@@ -23,6 +26,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let mut client = HttpClient::new().name(NAME.to_string());
     let gateway = client.create_gateway().await?;
     let gh = Github::new(env::var("GITHUB_TOKEN").ok());
+    let playground = Playground::new();
 
     let mut events = gateway.get_events().await?;
 
@@ -197,6 +201,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                         .send("<https://www.youtube.com/watch?v=a51VH9BYzZA>")
                         .await?;
                 }
+                ("exec", Some(code)) => {
+                    client
+                        .send(
+                            playground
+                                .execute(PlaygroundRequest::new(
+                                    code.replace("```rs", "").replace("```", "").to_string(),
+                                ))
+                                .await?
+                                .to_string(),
+                        )
+                        .await?;
+                }
                 ("help", _) => {
                     client
                         .send(concat!(
@@ -215,6 +231,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                             "org, ",
                             "github|gh|repo [repo], ",
                             "stellar, ",
+                            "exec <code>, ",
                             "help"
                         ))
                         .await?;
