@@ -17,5 +17,5 @@ reqwest = { version = "0.11.11", features = ["json"] }
 serde = { version = "1.0.144", features = ["derive"] }
 serde_json = "1.0.85"
 tokio = { version = "1.21.1", features = ["rt-multi-thread", "macros"] }
-eludrs = { version = "0.1.0", path = "../eludris/community/eludrs" }
+eludrs = { version = "0.1.0", git = "https://github.com/eludris-community/eludrs" }
 uwuki_macros = { path = "./uwuki_macros" }

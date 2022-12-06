@@ -273,6 +273,7 @@ dependencies = [
 [[package]]
 name = "eludrs"
 version = "0.1.0"
+source = "git+https://github.com/eludris-community/eludrs#b749dd8a021e064d5b5f8887bc37421b5e83f003"
 dependencies = [
  "anyhow",
  "futures",
