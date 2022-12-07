@@ -131,7 +131,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             msg.content.drain(..PREFIX.len());
             match msg
                 .content
-                .split_once(' ')
+                .split_once([' ', '\n'])
                 .map(|(cmd, args)| (cmd, Some(args)))
                 .unwrap_or((msg.content.trim(), None))
             {
