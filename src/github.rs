@@ -31,13 +31,15 @@ pub struct Issue {
 
 impl Display for Issue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "<{}>", self.url)?;
         writeln!(f, "```")?;
         writeln!(f, "Number:         #{}", self.number)?;
-        writeln!(f, "Url:            {}", self.url)?;
         writeln!(f, "State:          {}", self.state)?;
         writeln!(f, "Title:          {}", self.title)?;
         writeln!(f, "Author:         {}", self.user.login)?;
-        writeln!(f, "Comments:       {}", self.comments)?;
+        if self.comments > 0 {
+            writeln!(f, "Comments:       {}", self.comments)?;
+        }
         if let Some(body) = &self.body {
             writeln!(f, "Body:\n{}", body)?;
         }
@@ -68,9 +70,9 @@ pub struct Repository {
 
 impl Display for Repository {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "<{}>", self.url)?;
         writeln!(f, "```")?;
         writeln!(f, "{}", self.name)?;
-        writeln!(f, "Url:            {}", self.url)?;
         if let Some(homepage) = &self.homepage {
             if !homepage.is_empty() {
                 writeln!(f, "Homepage:       {}", homepage)?;
@@ -80,7 +82,9 @@ impl Display for Repository {
             writeln!(f, "Description:    {}", description)?;
         }
         writeln!(f, "Stars:          {}", self.stars)?;
-        writeln!(f, "Open issues:    {}", self.issues)?;
+        if self.issues > 0 {
+            writeln!(f, "Open issues:    {}", self.issues)?;
+        }
         if let Some(language) = &self.language {
             writeln!(f, "Language:       {}", language)?;
         }
