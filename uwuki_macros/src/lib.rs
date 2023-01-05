@@ -9,6 +9,7 @@ pub fn command(_: TokenStream, item: TokenStream) -> TokenStream {
     let item = syn::parse_macro_input!(item as ItemFn);
     let span = item.span();
     let name = item.sig.ident;
+    let vis = item.vis;
     let mut name_str = name.to_string();
     let args = item.sig.inputs;
     let block = item.block;
@@ -88,7 +89,7 @@ pub fn command(_: TokenStream, item: TokenStream) -> TokenStream {
         .filter(|a| !a.path.is_ident("uwuki"))
         .collect();
 
-    let command_path = quote!(crate::commands::Command);
+    let command_path = quote!(crate::command_handler::Command);
 
     let description = match description {
         Some(description) => description,
@@ -110,7 +111,7 @@ pub fn command(_: TokenStream, item: TokenStream) -> TokenStream {
     let struct_name = format_ident!("{}_COMMAND", name.to_string().to_uppercase());
     quote!(
         #(#attrs)*
-        fn #name<'a>(#args) -> std::pin::Pin<Box<dyn std::future::Future<Output = #ret> + Send + 'a>>{
+        #vis fn #name<'a>(#args) -> std::pin::Pin<Box<dyn std::future::Future<Output = #ret> + Send + 'a>>{
             Box::pin(async move { #block })
         }
 
