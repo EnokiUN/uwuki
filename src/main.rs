@@ -1,21 +1,20 @@
+mod command_handler;
+mod commands;
 mod github;
 mod playground;
 mod utils;
 
-use std::{collections::HashSet, env};
-
-use futures::{future::join_all, stream::StreamExt};
-use lazy_static::lazy_static;
-use playground::Playground;
-use regex::Regex;
+use std::{collections::HashSet, env, sync::Arc};
 
 use eludrs::HttpClient;
+use futures::{future::join_all, stream::StreamExt};
+use lazy_static::lazy_static;
+use regex::Regex;
+
+use command_handler::CommandRunner;
 use github::*;
-use playground::*;
-use utils::*;
 
 const PREFIX: &str = "uwu ";
-const VELUM_PREFIX: &str = "!";
 const NAME: &str = "Uwuki";
 
 #[tokio::main]
@@ -25,14 +24,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let mut client = HttpClient::new().name(NAME.to_string());
     let gateway = client.create_gateway().await?;
+    let client = Arc::new(client);
     let gh = Github::new(env::var("GITHUB_TOKEN").ok());
-    let playground = Playground::new();
+
+    let commands = CommandRunner::new(PREFIX.to_string()).commands(&[]);
 
     let mut events = gateway.get_events().await?;
 
     while let Some(mut msg) = events.next().await {
         if msg.author == NAME {
             continue;
+        } else if msg.content.trim().to_lowercase() == "uwu" {
+            client.send("UwU").await?;
+            continue;
+        }
+
+        if let Err(err) = commands.run_command(Arc::clone(&client), msg.clone()).await {
+            client
+                .send(format!("You're bad, you broke me :( ({:?})", err))
+                .await
+                .ok();
         }
 
         lazy_static! {
@@ -118,11 +129,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         blocks.append(&mut issues);
         blocks.append(&mut snippets);
 
-        if msg.content.trim().to_lowercase() == "uwu" {
-            client.send("UwU").await?;
-        } else if !blocks.is_empty() {
+        if !blocks.is_empty() {
             let content = blocks.join("\n");
-            if content.len() > client.get_instance_info().await?.message_limit {
+            if content.len() > 2000 {
                 client.send("Content too long uwu but sad").await?;
             } else {
                 client.send(blocks.join("\n")).await?;
@@ -135,36 +144,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 .map(|(cmd, args)| (cmd, Some(args)))
                 .unwrap_or((msg.content.trim(), None))
             {
-                ("say", Some(args)) => {
-                    client.send(args).await?;
-                }
-                ("imposter", Some(args)) => {
-                    let mut content = args.to_string();
-                    let author = get_arg(&mut content);
-                    if author.len() < 2 || author.len() > 32 {
-                        client
-                                .send("The author name should be between 2-32 characters long *b..baka!* >//<")
-                                .await?;
-                    } else if content.is_empty() {
-                        client.send_message(author, "I am sus").await?;
-                    } else {
-                        client.send_message(author, content).await?;
-                    }
-                }
-                ("ban", Some(args)) => {
-                    client.send(format!("Banned {} :hammer:", args)).await?;
-                }
-                ("unban", Some(args)) => {
-                    client.send(format!("unBanned {} un:hammer:", args)).await?;
-                }
-                ("bonk", Some(args)) => {
-                    client.send(format!("Bonkned {} :hammer:", args)).await?;
-                }
-                ("unbonk", Some(args)) => {
-                    client
-                        .send(format!("unBonkned {} un:hammer:", args))
-                        .await?;
-                }
                 ("waa", _) => {
                     client.send("desuwa!").await?;
                 }
@@ -201,84 +180,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                         .send("<https://www.youtube.com/watch?v=a51VH9BYzZA>")
                         .await?;
                 }
-                ("exec", Some(code)) => {
-                    client
-                        .send(
-                            playground
-                                .execute(PlaygroundRequest::new(
-                                    code.replace("```rs", "").replace("```", "").to_string(),
-                                ))
-                                .await?
-                                .to_string(),
-                        )
-                        .await?;
-                }
-                ("help", _) => {
-                    client
-                        .send(concat!(
-                            "commands: say <text>, ",
-                            "imposter <author> [text], ",
-                            "ban <user>, ",
-                            "unban <user>, ",
-                            "bonk <user>, ",
-                            "unbonk <user>, ",
-                            "waa, ",
-                            "info, ",
-                            "blog, ",
-                            "docs, ",
-                            "awesome|awe, ",
-                            "community, ",
-                            "org, ",
-                            "github|gh|repo [repo], ",
-                            "stellar, ",
-                            "exec <code>, ",
-                            "help"
-                        ))
-                        .await?;
-                }
-                _ => {}
-            }
-
-        // ---------- sharp trollage ----------
-        } else if msg.content.starts_with(VELUM_PREFIX) {
-            msg.content.drain(..VELUM_PREFIX.len());
-            match msg
-                .content
-                .split_once(' ')
-                .map(|(cmd, args)| (cmd, Some(args)))
-                .unwrap_or((msg.content.trim(), None))
-            {
-                ("gay", Some(args))
-                    if ["enok", "enokiun"].contains(&args.trim().to_lowercase().as_ref()) =>
-                {
-                    client
-                        .send("Sharp is turbo... straight, I don't do gender bullying")
-                        .await?;
-                }
-                ("gay", Some(_)) => {
-                    client.send("Sharp is a clown :clown:").await?;
-                }
-                ("throw", Some(args)) => {
-                    client
-                        .send(format!(
-                            "Unthrew a(n) {}! (superior argument handling BTW)",
-                            args
-                        ))
-                        .await?;
-                }
-                ("speed", _) => {
-                    client.send("I am the faster.").await?;
-                }
-                ("maths", _) => {
-                    client.send("Enoki is 9 feet longer than Sharp").await?;
-                }
-                ("help", _) => {
-                    client.send("Imagine no help command L (UwU)").await?;
-                }
-                ("lmao", _) => {
-                    client.send("lmaon't").await?;
-                }
-
                 _ => {}
             }
         } else if msg.content.trim() == "I am the fastest." {
