@@ -16,6 +16,7 @@ use command_handler::CommandRunner;
 use github::*;
 
 const PREFIX: &str = "uwu ";
+const HELP_INVOCATION: &str = "uwu help";
 const NAME: &str = "Uwuki";
 
 #[tokio::main]
@@ -140,13 +141,39 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             } else {
                 client.send(content).await?;
             }
-        } else if msg.content.starts_with(PREFIX) {
-            msg.content.drain(..PREFIX.len());
-            let (_cmd, _args) = msg
-                .content
-                .split_once([' ', '\n'])
-                .map(|(cmd, args)| (cmd, Some(args)))
-                .unwrap_or((msg.content.trim(), None));
+        } else if msg.content.starts_with(HELP_INVOCATION) {
+            msg.content.drain(..HELP_INVOCATION.len());
+            if msg.content.is_empty() {
+                client
+                    .send(format!(
+                        "```\nHelp:\n{}\n\nuwu > owo\n```",
+                        commands
+                            .get_commands()
+                            .into_iter()
+                            .map(|c| format!(
+                                "{:<15} {}",
+                                format!("{}:", c.names[0]),
+                                c.description
+                            ))
+                            .collect::<Vec<String>>()
+                            .join("\n")
+                    ))
+                    .await?;
+            } else {
+                match commands.get_command(msg.content.trim()) {
+                    Some(command) => {
+                        client
+                            .send(format!(
+                                "```\n__{}__\n{}\n\n{}\n```",
+                                command.names[0], command.description, command.usage
+                            ))
+                            .await?;
+                    }
+                    None => {
+                        client.send("Could not find that command, L? >~<").await?;
+                    }
+                }
+            };
         }
     }
 
