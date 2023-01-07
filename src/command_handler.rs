@@ -63,6 +63,11 @@ impl<'a> CommandRunner<'a> {
         &self.commands
     }
 
+    pub fn get_command(&self, name: &str) -> Option<&Command<'a>> {
+        let index = self.lookup.get(name)?;
+        self.commands.get(*index)
+    }
+
     pub async fn run_command(&self, client: Arc<HttpClient>, message: Message) -> CommandResult {
         if message.content.starts_with(&self.prefix) {
             let (command, args) = message.content[self.prefix.len()..]
