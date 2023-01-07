@@ -12,6 +12,7 @@ pub async fn ban(client: Arc<HttpClient>, _: Message, args: Option<String>) -> C
     if let Some(args) = args {
         client.send(format!("Banned {} :hammer:", args)).await?;
     }
+
     Ok(())
 }
 
@@ -22,6 +23,7 @@ pub async fn unban(client: Arc<HttpClient>, _: Message, args: Option<String>) ->
     if let Some(args) = args {
         client.send(format!("unBanned {} un:hammer:", args)).await?;
     }
+
     Ok(())
 }
 
@@ -32,6 +34,7 @@ pub async fn bonk(client: Arc<HttpClient>, _: Message, args: Option<String>) -> 
     if let Some(args) = args {
         client.send(format!("Bonkned {} :hammer:", args)).await?;
     }
+
     Ok(())
 }
 
@@ -44,5 +47,6 @@ pub async fn unbonk(client: Arc<HttpClient>, _: Message, args: Option<String>) -
             .send(format!("unBonkned {} un:hammer:", args))
             .await?;
     }
+
     Ok(())
 }

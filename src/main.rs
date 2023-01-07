@@ -6,6 +6,7 @@ mod utils;
 
 use std::{collections::HashSet, env, sync::Arc};
 
+use commands::commands;
 use eludrs::HttpClient;
 use futures::{future::join_all, stream::StreamExt};
 use lazy_static::lazy_static;
@@ -27,7 +28,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let client = Arc::new(client);
     let gh = Github::new(env::var("GITHUB_TOKEN").ok());
 
-    let commands = CommandRunner::new(PREFIX.to_string()).commands(&[]);
+    let commands = CommandRunner::new(PREFIX.to_string()).commands(&commands()[..]);
 
     let mut events = gateway.get_events().await?;
 
@@ -36,6 +37,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             continue;
         } else if msg.content.trim().to_lowercase() == "uwu" {
             client.send("UwU").await?;
+            continue;
+        } else if msg.content.trim().to_lowercase() == "!speed" {
+            client.send("I am the faster.").await?;
             continue;
         }
 
@@ -134,56 +138,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             if content.len() > 2000 {
                 client.send("Content too long uwu but sad").await?;
             } else {
-                client.send(blocks.join("\n")).await?;
+                client.send(content).await?;
             }
         } else if msg.content.starts_with(PREFIX) {
             msg.content.drain(..PREFIX.len());
-            match msg
+            let (_cmd, _args) = msg
                 .content
                 .split_once([' ', '\n'])
                 .map(|(cmd, args)| (cmd, Some(args)))
-                .unwrap_or((msg.content.trim(), None))
-            {
-                ("waa", _) => {
-                    client.send("desuwa!").await?;
-                }
-                ("info", _) => {
-                    client.send("<https://eludris.pages.dev>").await?;
-                }
-                ("blog", _) => {
-                    client.send("<https://eludris.pages.dev/blog>").await?;
-                }
-                ("docs", _) => {
-                    client.send("https://eludris.github.io/docs").await?;
-                }
-                ("awesome" | "awe", _) => {
-                    client.send("<https://github.com/eludris/awesome>").await?;
-                }
-                ("community", _) => {
-                    client
-                        .send("<https://github.com/eludris-community>")
-                        .await?;
-                }
-                ("org", _) => {
-                    client.send("<https://github.com/eludris>").await?;
-                }
-                ("github" | "gh" | "repo", repo) => {
-                    client
-                        .send(format!(
-                            "<https://github.com/eludris/{}>",
-                            repo.unwrap_or("eludris").split(' ').next().unwrap()
-                        ))
-                        .await?;
-                }
-                ("stellar", _) => {
-                    client
-                        .send("<https://www.youtube.com/watch?v=a51VH9BYzZA>")
-                        .await?;
-                }
-                _ => {}
-            }
-        } else if msg.content.trim() == "I am the fastest." {
-            client.send("I am the even fasterer.").await?;
+                .unwrap_or((msg.content.trim(), None));
         }
     }
 

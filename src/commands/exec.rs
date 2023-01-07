@@ -11,7 +11,7 @@ use crate::{
 #[command]
 #[uwuki(description = "Says what you need to say")]
 #[uwuki(usage = "say <shit here>")]
-pub async fn exec(client: Arc<HttpClient>, msg: Message, args: Option<String>) -> CommandResult {
+pub async fn exec(client: Arc<HttpClient>, _: Message, args: Option<String>) -> CommandResult {
     let playground = Playground::new();
     if let Some(code) = args {
         client
@@ -25,4 +25,6 @@ pub async fn exec(client: Arc<HttpClient>, msg: Message, args: Option<String>) -
             )
             .await?;
     }
+
+    Ok(())
 }
