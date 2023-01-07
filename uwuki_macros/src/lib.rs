@@ -22,6 +22,7 @@ pub fn command(_: TokenStream, item: TokenStream) -> TokenStream {
 
     let mut description = None;
     let mut usage = None;
+    let mut aliases: Vec<String> = vec![];
 
     for attr in item.attrs.iter().filter(|a| a.path.is_ident("uwuki")) {
         let args: MetaNameValue = match attr.parse_args() {
@@ -59,6 +60,18 @@ pub fn command(_: TokenStream, item: TokenStream) -> TokenStream {
                     "usage" => {
                         if let Lit::Str(lit) = args.lit {
                             usage = Some(lit.value());
+                        } else {
+                            return Error::new(
+                                args.lit.span(),
+                                "The supplied argument must be a string literal",
+                            )
+                            .into_compile_error()
+                            .into();
+                        }
+                    }
+                    "alias" => {
+                        if let Lit::Str(lit) = args.lit {
+                            aliases.push(lit.value());
                         } else {
                             return Error::new(
                                 args.lit.span(),
@@ -116,7 +129,7 @@ pub fn command(_: TokenStream, item: TokenStream) -> TokenStream {
         }
 
         pub static #struct_name: #command_path = #command_path {
-            name: #name_str,
+            names: &[#name_str, #(#aliases),*],
             description: #description,
             usage: #usage,
             func: #name,
