@@ -59,6 +59,10 @@ impl<'a> CommandRunner<'a> {
         self
     }
 
+    pub fn get_commands(&self) -> &Vec<Command<'a>> {
+        &self.commands
+    }
+
     pub async fn run_command(&self, client: Arc<HttpClient>, message: Message) -> CommandResult {
         if message.content.starts_with(&self.prefix) {
             let (command, args) = message.content[self.prefix.len()..]
