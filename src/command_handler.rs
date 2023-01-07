@@ -7,7 +7,7 @@ pub type CommandResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
 
 #[derive(Clone)]
 pub struct Command<'a> {
-    pub name: &'a str,
+    pub names: &'a [&'a str],
     pub description: &'a str,
     pub usage: &'a str,
     pub func: fn(Arc<HttpClient>, Message, Option<String>) -> BoxFuture<'a, CommandResult>,
@@ -16,7 +16,7 @@ pub struct Command<'a> {
 impl<'a> Debug for Command<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Command")
-            .field("name", &self.name)
+            .field("names", &self.names)
             .field("description", &self.description)
             .field("usage", &self.usage)
             .finish()
@@ -40,7 +40,9 @@ impl<'a> CommandRunner<'a> {
     }
 
     pub fn add_command(&mut self, command: Command<'a>) {
-        self.lookup.insert(command.name, self.commands.len());
+        for name in command.names {
+            self.lookup.insert(name, self.commands.len());
+        }
         self.commands.push(command);
     }
 
@@ -51,7 +53,7 @@ impl<'a> CommandRunner<'a> {
     }
 
     pub fn commands(mut self, commands: &[Command<'a>]) -> Self {
-        for command in commands.to_vec() {
+        for command in commands.iter().cloned() {
             self.add_command(command);
         }
         self
