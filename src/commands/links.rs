@@ -63,3 +63,21 @@ pub async fn github(client: Arc<HttpClient>, _: Message, _: Option<String>) -> C
 
     Ok(())
 }
+
+#[command]
+#[uwuki(description = "Sends the link to the Eludris subreddit")]
+#[uwuki(usage = "reddit")]
+pub async fn reddit(client: Arc<HttpClient>, _: Message, _: Option<String>) -> CommandResult {
+    client.send("<https://reddit.com/r/eludris>").await?;
+
+    Ok(())
+}
+
+#[command]
+#[uwuki(description = "Sends the link to the Eludris Twitter account")]
+#[uwuki(usage = "twitter")]
+pub async fn twitter(client: Arc<HttpClient>, _: Message, _: Option<String>) -> CommandResult {
+    client.send("<https://twitter.com/eludris>").await?;
+
+    Ok(())
+}
