@@ -1,0 +1,5 @@
+target
+Dockerfile
+docker-compose.yml
+README.md
+.git # 4mb of build context :trol:
