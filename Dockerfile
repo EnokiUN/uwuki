@@ -1,28 +1,23 @@
+# syntax=docker/dockerfile:1
 FROM rust:slim-buster as builder
 
-RUN USER=root cargo new --bin uwuki
 WORKDIR /uwuki
 
-RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
-
-COPY Cargo.lock Cargo.toml ./
-COPY uwuki_macros ./uwuki_macros
-
-RUN cargo build --release
-RUN rm src/*.rs
-
+COPY ./Cargo.toml .
+COPY ./Cargo.lock .
+COPY ./uwuki_macros ./uwuki_macros
 COPY ./src ./src
 
-RUN rm ./target/release/deps/uwuki*
-RUN cargo build --release
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=./target \
+    cargo build --release
 
+# Other image cannot access the target folder.
+RUN --mount=type=cache,target=./target \
+    cp ./target/release/uwuki /usr/local/bin/uwuki
 
 FROM debian:buster-slim
 
-RUN apt-get update && apt-get install -y ca-certificates libssl-dev
-
-COPY --from=builder /uwuki/target/release/uwuki /bin/uwuki
-
-ENV RUST_LOG debug
+COPY --from=builder /usr/local/bin/uwuki /bin/uwuki
 
 CMD ["/bin/uwuki"]
