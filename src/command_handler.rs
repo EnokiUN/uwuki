@@ -61,6 +61,7 @@ impl<'a, S: Debug + Send + Sync + Clone> CommandRunner<'a, S> {
         self
     }
 
+    #[allow(dead_code)]
     pub fn state(mut self, state: Arc<S>) -> Self {
         self.state = state;
         self
