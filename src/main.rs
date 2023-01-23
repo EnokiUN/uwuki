@@ -2,6 +2,7 @@ mod command_handler;
 mod commands;
 mod github;
 mod playground;
+mod state;
 mod utils;
 
 use std::{collections::HashSet, env, sync::Arc};
@@ -13,7 +14,9 @@ use lazy_static::lazy_static;
 use regex::Regex;
 
 use command_handler::CommandRunner;
-use github::*;
+use github::GitHub;
+use reqwest::Client;
+use state::UwukiState;
 
 const PREFIX: &str = "uwu ";
 const HELP_INVOCATION: &str = "uwu help";
@@ -26,10 +29,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let mut client = HttpClient::new().name(NAME.to_string());
     let gateway = client.create_gateway().await?;
-    let client = Arc::new(client);
-    let gh = Github::new(env::var("GITHUB_TOKEN").ok());
 
-    let commands = CommandRunner::new(PREFIX.to_string()).commands(&commands()[..]);
+    let state = Arc::new(UwukiState {
+        http: client,
+        client: Client::new(),
+        github_token: env::var("GITHUB_TOKEN").ok(),
+    });
+
+    let commands =
+        CommandRunner::new(PREFIX.to_string(), Arc::clone(&state)).commands(&commands()[..]);
 
     let mut events = gateway.get_events().await?;
 
@@ -37,15 +45,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         if msg.author == NAME {
             continue;
         } else if msg.content.trim().to_lowercase() == "uwu" {
-            client.send("UwU").await?;
+            state.send("UwU").await?;
             continue;
         } else if msg.content.trim().to_lowercase() == "!speed" {
-            client.send("I am the faster.").await?;
+            state.send("I am the faster.").await?;
             continue;
         }
 
-        if let Err(err) = commands.run_command(Arc::clone(&client), msg.clone()).await {
-            client
+        if let Err(err) = commands.run_command(msg.clone()).await {
+            state
                 .send(format!("You're bad, you broke me :( ({:?})", err))
                 .await
                 .ok();
@@ -68,7 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 })
                 .collect::<HashSet<(&str, &str)>>()
                 .into_iter()
-                .map(|(user, repo)| gh.get_repo(user, repo)),
+                .map(|(user, repo)| state.get_repo(user, repo)),
         )
         .await
         .into_iter()
@@ -100,7 +108,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 })
                 .collect::<HashSet<(&str, &str, u32)>>()
                 .into_iter()
-                .map(|(user, repo, num)| gh.get_issue(user, repo, num)),
+                .map(|(user, repo, num)| state.get_issue(user, repo, num)),
         )
         .await
         .into_iter()
@@ -122,7 +130,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 })
                 .collect::<HashSet<(&str, &str, &str, u32, Option<u32>)>>()
                 .into_iter()
-                .map(|(user, repo, file, start, end)| gh.get_snippet(user, repo, file, start, end)),
+                .map(|(user, repo, file, start, end)| {
+                    state.get_snippet(user, repo, file, start, end)
+                }),
         )
         .await
         .into_iter()
@@ -137,19 +147,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         if !blocks.is_empty() {
             let content = blocks.join("\n");
             if content.len() > 2000 {
-                client.send("Content too long uwu but sad").await?;
+                state.send("Content too long uwu but sad").await?;
             } else {
-                client.send(content).await?;
+                state.send(content).await?;
             }
         } else if msg.content.starts_with(HELP_INVOCATION) {
             msg.content.drain(..HELP_INVOCATION.len());
             if msg.content.is_empty() {
-                client
+                state
                     .send(format!(
                         "```\nHelp:\n{}\n\nuwu > owo\n```",
                         commands
                             .get_commands()
-                            .into_iter()
+                            .iter()
                             .map(|c| format!(
                                 "{:<15} {}",
                                 format!("{}:", c.names[0]),
@@ -162,7 +172,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             } else {
                 match commands.get_command(msg.content.trim()) {
                     Some(command) => {
-                        client
+                        state
                             .send(format!(
                                 "```\n__{}__\n{}\n\n{}\n```",
                                 command.names[0], command.description, command.usage
@@ -170,7 +180,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                             .await?;
                     }
                     None => {
-                        client.send("Could not find that command, L? >~<").await?;
+                        state.send("Could not find that command, L? >~<").await?;
                     }
                 }
             };
