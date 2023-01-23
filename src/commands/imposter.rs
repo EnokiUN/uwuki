@@ -1,7 +1,7 @@
 use eludrs::todel::Message;
 use uwuki_macros::command;
 
-use crate::{command_handler::CommandResult, state::State, utils::get_arg};
+use crate::{command_handler::CommandResult, state::State, utils::get_arg, PREFIX};
 
 #[command]
 #[uwuki(description = "Imposters your imposter")]
@@ -17,7 +17,9 @@ pub async fn imposter(state: State, _: Message, args: Option<String>) -> Command
         } else if content.is_empty() {
             state.send_message(author, "I am sus").await?;
         } else {
-            state.send_message(author, content).await?;
+            if !content.starts_with(PREFIX) {
+                state.send_message(author, content).await?;
+            }
         }
     }
 
