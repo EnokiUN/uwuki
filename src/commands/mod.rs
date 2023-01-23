@@ -15,9 +15,9 @@ use links::{
 use say::SAY_COMMAND;
 use vtuber::{STELLAR_COMMAND, WAA_COMMAND};
 
-use crate::command_handler::Command;
+use crate::{command_handler::Command, state::UwukiState};
 
-pub fn commands<'a>() -> Vec<Command<'a>> {
+pub fn commands<'a>() -> Vec<Command<'a, UwukiState>> {
     vec![
         BAN_COMMAND.clone(),
         BONK_COMMAND.clone(),

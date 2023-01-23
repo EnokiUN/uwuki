@@ -1,16 +1,14 @@
-use std::sync::Arc;
-
-use eludrs::{todel::Message, HttpClient};
+use eludrs::todel::Message;
 use uwuki_macros::command;
 
-use crate::command_handler::CommandResult;
+use crate::{command_handler::CommandResult, state::State};
 
 #[command]
 #[uwuki(description = "Says what you need to say")]
 #[uwuki(usage = "say <shit here>")]
-pub async fn say(client: Arc<HttpClient>, _: Message, args: Option<String>) -> CommandResult {
+pub async fn say(state: State, _: Message, args: Option<String>) -> CommandResult {
     if let Some(args) = args {
-        client.send(args).await?;
+        state.send(args).await?;
     }
 
     Ok(())

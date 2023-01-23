@@ -1,15 +1,13 @@
-use std::sync::Arc;
-
-use eludrs::{todel::Message, HttpClient};
+use eludrs::todel::Message;
 use uwuki_macros::command;
 
-use crate::command_handler::CommandResult;
+use crate::{command_handler::CommandResult, state::State};
 
 #[command]
 #[uwuki(description = "Does the waa")]
 #[uwuki(usage = "waa")]
-pub async fn waa(client: Arc<HttpClient>, _: Message, _: Option<String>) -> CommandResult {
-    client.send("desuwa!").await?;
+pub async fn waa(state: State, _: Message, _: Option<String>) -> CommandResult {
+    state.send("desuwa!").await?;
 
     Ok(())
 }
@@ -17,8 +15,8 @@ pub async fn waa(client: Arc<HttpClient>, _: Message, _: Option<String>) -> Comm
 #[command]
 #[uwuki(description = "For when you're feeling a bit STELLAR STELLAR")]
 #[uwuki(usage = "stellar")]
-pub async fn stellar(client: Arc<HttpClient>, _: Message, _: Option<String>) -> CommandResult {
-    client
+pub async fn stellar(state: State, _: Message, _: Option<String>) -> CommandResult {
+    state
         .send("<https://www.youtube.com/watch?v=a51VH9BYzZA>")
         .await?;
 

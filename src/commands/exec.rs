@@ -1,22 +1,20 @@
-use std::sync::Arc;
-
-use eludrs::{todel::Message, HttpClient};
+use eludrs::todel::Message;
 use uwuki_macros::command;
 
 use crate::{
     command_handler::CommandResult,
     playground::{Playground, PlaygroundRequest},
+    state::State,
 };
 
 #[command]
 #[uwuki(description = "Says what you need to say")]
 #[uwuki(usage = "say <shit here>")]
-pub async fn exec(client: Arc<HttpClient>, _: Message, args: Option<String>) -> CommandResult {
-    let playground = Playground::new();
+pub async fn exec(state: State, _: Message, args: Option<String>) -> CommandResult {
     if let Some(code) = args {
-        client
+        state
             .send(
-                playground
+                state
                     .execute(PlaygroundRequest::new(
                         code.replace("```rs", "").replace("```", "").to_string(),
                     ))

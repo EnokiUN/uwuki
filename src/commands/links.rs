@@ -1,15 +1,13 @@
-use std::sync::Arc;
-
-use eludrs::{todel::Message, HttpClient};
+use eludrs::todel::Message;
 use uwuki_macros::command;
 
-use crate::command_handler::CommandResult;
+use crate::{command_handler::CommandResult, state::State};
 
 #[command]
 #[uwuki(description = "Sends the link to the Eludris website")]
 #[uwuki(usage = "info")]
-pub async fn info(client: Arc<HttpClient>, _: Message, _: Option<String>) -> CommandResult {
-    client.send("<https://eludris.pages.dev>").await?;
+pub async fn info(state: State, _: Message, _: Option<String>) -> CommandResult {
+    state.send("<https://eludris.pages.dev>").await?;
 
     Ok(())
 }
@@ -17,8 +15,8 @@ pub async fn info(client: Arc<HttpClient>, _: Message, _: Option<String>) -> Com
 #[command]
 #[uwuki(description = "Sends the link to the Eludris blog")]
 #[uwuki(usage = "blog")]
-pub async fn blog(client: Arc<HttpClient>, _: Message, _: Option<String>) -> CommandResult {
-    client.send("<https://eludris.pages.dev/blog>").await?;
+pub async fn blog(state: State, _: Message, _: Option<String>) -> CommandResult {
+    state.send("<https://eludris.pages.dev/blog>").await?;
 
     Ok(())
 }
@@ -26,8 +24,8 @@ pub async fn blog(client: Arc<HttpClient>, _: Message, _: Option<String>) -> Com
 #[command]
 #[uwuki(description = "Sends the link to the Eludris docs")]
 #[uwuki(usage = "docs")]
-pub async fn docs(client: Arc<HttpClient>, _: Message, _: Option<String>) -> CommandResult {
-    client.send("https://eludris.github.io/docs").await?;
+pub async fn docs(state: State, _: Message, _: Option<String>) -> CommandResult {
+    state.send("https://eludris.github.io/docs").await?;
 
     Ok(())
 }
@@ -36,8 +34,8 @@ pub async fn docs(client: Arc<HttpClient>, _: Message, _: Option<String>) -> Com
 #[uwuki(description = "Sends the link to the Eludris awesome repository")]
 #[uwuki(alias = "awe")]
 #[uwuki(usage = "awesome|awe")]
-pub async fn awesome(client: Arc<HttpClient>, _: Message, _: Option<String>) -> CommandResult {
-    client.send("<https://github.com/eludris/awesome>").await?;
+pub async fn awesome(state: State, _: Message, _: Option<String>) -> CommandResult {
+    state.send("<https://github.com/eludris/awesome>").await?;
 
     Ok(())
 }
@@ -45,10 +43,8 @@ pub async fn awesome(client: Arc<HttpClient>, _: Message, _: Option<String>) -> 
 #[command]
 #[uwuki(description = "Sends the link to the Eludris community organisation")]
 #[uwuki(usage = "community")]
-pub async fn community(client: Arc<HttpClient>, _: Message, _: Option<String>) -> CommandResult {
-    client
-        .send("<https://github.com/eludris-community>")
-        .await?;
+pub async fn community(state: State, _: Message, _: Option<String>) -> CommandResult {
+    state.send("<https://github.com/eludris-community>").await?;
 
     Ok(())
 }
@@ -58,8 +54,8 @@ pub async fn community(client: Arc<HttpClient>, _: Message, _: Option<String>) -
 #[uwuki(alias = "gh")]
 #[uwuki(alias = "org")]
 #[uwuki(usage = "github|gh|org")]
-pub async fn github(client: Arc<HttpClient>, _: Message, _: Option<String>) -> CommandResult {
-    client.send("<https://github.com/eludris>").await?;
+pub async fn github(state: State, _: Message, _: Option<String>) -> CommandResult {
+    state.send("<https://github.com/eludris>").await?;
 
     Ok(())
 }
@@ -67,8 +63,8 @@ pub async fn github(client: Arc<HttpClient>, _: Message, _: Option<String>) -> C
 #[command]
 #[uwuki(description = "Sends the link to the Eludris subreddit")]
 #[uwuki(usage = "reddit")]
-pub async fn reddit(client: Arc<HttpClient>, _: Message, _: Option<String>) -> CommandResult {
-    client.send("<https://reddit.com/r/eludris>").await?;
+pub async fn reddit(state: State, _: Message, _: Option<String>) -> CommandResult {
+    state.send("<https://reddit.com/r/eludris>").await?;
 
     Ok(())
 }
@@ -76,8 +72,8 @@ pub async fn reddit(client: Arc<HttpClient>, _: Message, _: Option<String>) -> C
 #[command]
 #[uwuki(description = "Sends the link to the Eludris Twitter account")]
 #[uwuki(usage = "twitter")]
-pub async fn twitter(client: Arc<HttpClient>, _: Message, _: Option<String>) -> CommandResult {
-    client.send("<https://twitter.com/eludris>").await?;
+pub async fn twitter(state: State, _: Message, _: Option<String>) -> CommandResult {
+    state.send("<https://twitter.com/eludris>").await?;
 
     Ok(())
 }
