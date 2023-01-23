@@ -22,9 +22,20 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.66"
+version = "1.0.68"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "216261ddc8289130e551ddcd5ce8a064710c0d064a4d2895c67151c92b5443f6"
+checksum = "2cb2f989d18dd141ab8ae82f64d1a8cdd37e0840f73a406896cf5e99502fab61"
+
+[[package]]
+name = "async-trait"
+version = "0.1.63"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eff18d764974428cf3a9328e23fc5c986f5fbed46e6cd4cdf42544df5d297ec1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
 
 [[package]]
 name = "atty"
@@ -262,8 +273,8 @@ dependencies = [
 
 [[package]]
 name = "eludrs"
-version = "0.1.0"
-source = "git+https://github.com/eludris-community/eludrs#a71613cd57922b729d608d8ea0b1f11ae77d9b04"
+version = "0.3.2"
+source = "git+https://github.com/eludris-community/eludrs#befecc436ff3c558f179bcd6b3b8876a5e309969"
 dependencies = [
  "anyhow",
  "futures",
@@ -1104,8 +1115,8 @@ checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
 
 [[package]]
 name = "todel"
-version = "0.3.1"
-source = "git+https://github.com/eludris/eludris?branch=next#f651fe0c7cca0f0a70c63210c798fffa3deb16fa"
+version = "0.3.2"
+source = "git+https://github.com/eludris/eludris#931305f64d9ea4eb7d879ac519a0a0924eecaa2c"
 dependencies = [
  "serde",
  "serde_with",
@@ -1305,6 +1316,8 @@ checksum = "09cc8ee72d2a9becf2f2febe0205bbed8fc6615b7cb429ad062dc7b7ddd036a9"
 name = "uwuki"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
+ "async-trait",
  "dotenvy",
  "eludrs",
  "env_logger",
