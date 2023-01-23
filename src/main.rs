@@ -1,5 +1,6 @@
 mod command_handler;
 mod commands;
+mod crates;
 mod github;
 mod playground;
 mod state;
