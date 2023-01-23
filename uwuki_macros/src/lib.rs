@@ -103,7 +103,7 @@ pub fn command(_: TokenStream, item: TokenStream) -> TokenStream {
         .collect();
 
     let command_path = quote!(crate::command_handler::Command);
-    let command_path = quote!(crate::state::UwukiState);
+    let state_path = quote!(crate::state::UwukiState);
 
     let description = match description {
         Some(description) => description,
