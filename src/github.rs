@@ -115,7 +115,7 @@ impl GitHub for UwukiState {
                 "{}/repos/{}/{}/issues/{}",
                 API_URL, user, repository, issue,
             ))
-            .header(USER_AGENT, "*The* Uwuki");
+            .header(USER_AGENT, "Uwuki (github.com/Enokiun)");
         let builder = if let Some(token) = &self.github_token {
             builder.bearer_auth(token)
         } else {
@@ -129,7 +129,7 @@ impl GitHub for UwukiState {
         let builder = self
             .client
             .get(format!("{}/repos/{}/{}", API_URL, user, repository))
-            .header(USER_AGENT, "*The* Uwuki");
+            .header(USER_AGENT, "Uwuki (github.com/Enokiun)");
         let builder = if let Some(token) = &self.github_token {
             builder.bearer_auth(token)
         } else {
@@ -161,7 +161,7 @@ impl GitHub for UwukiState {
                 "https://raw.githubusercontent.com/{}/{}/{}",
                 user, repo, file
             ))
-            .header(USER_AGENT, "*The* Uwuki");
+            .header(USER_AGENT, "Uwuki (github.com/Enokiun)");
         let builder = if let Some(token) = &self.github_token {
             builder.bearer_auth(token)
         } else {
