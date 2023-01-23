@@ -1,25 +1,12 @@
 use std::fmt::Display;
 
-use reqwest::Client;
+use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
+use crate::state::UwukiState;
+
 pub const API_URL: &str = "https://play.rust-lang.org/execute";
-pub type Error<T> = Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
-#[derive(Debug)]
-pub struct Playground {
-    client: Client,
-}
-
-//  {
-//    "channel":"stable",
-//    "mode":"debug",
-//    "edition":"2021",
-//    "crateType":"bin",
-//    "tests":false,
-//    "code":"[OMMITED]",
-//    "backtrace":false
-//  }
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PlaygroundRequest {
@@ -69,14 +56,14 @@ impl Display for PlaygroundResponse {
     }
 }
 
-impl Playground {
-    pub fn new() -> Self {
-        Self {
-            client: Client::new(),
-        }
-    }
+#[async_trait]
+pub trait Playground {
+    async fn execute(&self, request: PlaygroundRequest) -> anyhow::Result<PlaygroundResponse>;
+}
 
-    pub async fn execute(&self, request: PlaygroundRequest) -> Error<PlaygroundResponse> {
+#[async_trait]
+impl Playground for UwukiState {
+    async fn execute(&self, request: PlaygroundRequest) -> anyhow::Result<PlaygroundResponse> {
         Ok(self
             .client
             .post(API_URL)

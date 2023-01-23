@@ -1,16 +1,12 @@
 use std::fmt::Display;
 
-use reqwest::{header::USER_AGENT, Client};
+use async_trait::async_trait;
+use reqwest::header::USER_AGENT;
 use serde::{Deserialize, Serialize};
 
-pub const API_URL: &str = "https://api.github.com";
-pub type Error<T> = Result<T, Box<dyn std::error::Error + Send + Sync>>;
+use crate::state::UwukiState;
 
-#[derive(Debug)]
-pub struct Github {
-    client: Client,
-    token: Option<String>,
-}
+pub const API_URL: &str = "https://api.github.com";
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct User {
@@ -95,15 +91,23 @@ impl Display for Repository {
     }
 }
 
-impl Github {
-    pub fn new(token: Option<String>) -> Self {
-        Self {
-            client: Client::new(),
-            token,
-        }
-    }
+#[async_trait]
+pub trait GitHub {
+    async fn get_issue(&self, user: &str, repository: &str, issue: u32) -> anyhow::Result<Issue>;
+    async fn get_repo(&self, user: &str, repository: &str) -> anyhow::Result<Repository>;
+    async fn get_snippet(
+        &self,
+        user: &str,
+        repo: &str,
+        file: &str,
+        start: u32,
+        end: Option<u32>,
+    ) -> anyhow::Result<String>;
+}
 
-    pub async fn get_issue(&self, user: &str, repository: &str, issue: u32) -> Error<Issue> {
+#[async_trait]
+impl GitHub for UwukiState {
+    async fn get_issue(&self, user: &str, repository: &str, issue: u32) -> anyhow::Result<Issue> {
         log::debug!("Fetching issue {} at {}/{}", issue, user, repository);
         let builder = self
             .client
@@ -112,7 +116,7 @@ impl Github {
                 API_URL, user, repository, issue,
             ))
             .header(USER_AGENT, "*The* Uwuki");
-        let builder = if let Some(token) = &self.token {
+        let builder = if let Some(token) = &self.github_token {
             builder.bearer_auth(token)
         } else {
             builder
@@ -120,13 +124,13 @@ impl Github {
         Ok(builder.send().await?.json().await?)
     }
 
-    pub async fn get_repo(&self, user: &str, repository: &str) -> Error<Repository> {
+    async fn get_repo(&self, user: &str, repository: &str) -> anyhow::Result<Repository> {
         log::debug!("Fetching repository {}/{}", user, repository);
         let builder = self
             .client
             .get(format!("{}/repos/{}/{}", API_URL, user, repository))
             .header(USER_AGENT, "*The* Uwuki");
-        let builder = if let Some(token) = &self.token {
+        let builder = if let Some(token) = &self.github_token {
             builder.bearer_auth(token)
         } else {
             builder
@@ -135,14 +139,14 @@ impl Github {
     }
 
     // After some thought, this is *perfect*
-    pub async fn get_snippet(
+    async fn get_snippet(
         &self,
         user: &str,
         repo: &str,
         file: &str,
         start: u32,
         end: Option<u32>,
-    ) -> Error<String> {
+    ) -> anyhow::Result<String> {
         log::info!(
             "Fetching code snippet at {}/{} in {} from lines {} to {:?}",
             user,
@@ -158,7 +162,7 @@ impl Github {
                 user, repo, file
             ))
             .header(USER_AGENT, "*The* Uwuki");
-        let builder = if let Some(token) = &self.token {
+        let builder = if let Some(token) = &self.github_token {
             builder.bearer_auth(token)
         } else {
             builder
