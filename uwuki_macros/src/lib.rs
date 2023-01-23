@@ -103,6 +103,7 @@ pub fn command(_: TokenStream, item: TokenStream) -> TokenStream {
         .collect();
 
     let command_path = quote!(crate::command_handler::Command);
+    let command_path = quote!(crate::state::UwukiState);
 
     let description = match description {
         Some(description) => description,
@@ -128,7 +129,7 @@ pub fn command(_: TokenStream, item: TokenStream) -> TokenStream {
             Box::pin(async move { #block })
         }
 
-        pub static #struct_name: #command_path = #command_path {
+        pub static #struct_name: #command_path<#state_path> = #command_path {
             names: &[#name_str, #(#aliases),*],
             description: #description,
             usage: #usage,
