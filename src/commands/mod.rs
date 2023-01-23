@@ -1,4 +1,5 @@
 mod ban;
+mod crates;
 mod exec;
 mod imposter;
 mod links;
@@ -6,6 +7,7 @@ mod say;
 mod vtuber;
 
 use ban::{BAN_COMMAND, BONK_COMMAND, UNBAN_COMMAND, UNBONK_COMMAND};
+use crates::CRATES_COMMAND;
 use exec::EXEC_COMMAND;
 use imposter::IMPOSTER_COMMAND;
 use links::{
@@ -23,6 +25,7 @@ pub fn commands<'a>() -> Vec<Command<'a, UwukiState>> {
         BONK_COMMAND.clone(),
         UNBAN_COMMAND.clone(),
         UNBONK_COMMAND.clone(),
+        CRATES_COMMAND.clone(),
         EXEC_COMMAND.clone(),
         IMPOSTER_COMMAND.clone(),
         AWESOME_COMMAND.clone(),
