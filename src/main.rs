@@ -63,6 +63,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         lazy_static! {
             static ref REPO_REGEX: Regex = Regex::new(r"(?P<ignore>!)?(?P<user>[a-zA-Z0-9_-]+)/(?P<repo>[a-zA-Z0-9_.-]+)").unwrap();
             static ref ISSUE_REGEX: Regex = Regex::new(r"(:?(?P<user>[a-zA-Z0-9_-]+)/)?(?P<repo>[a-zA-Z0-9_.-]+)#(?P<num>\d+)").unwrap();
+            static ref COMMENT_REGEX: Regex = Regex::new(r"https://github\.com/(?P<user>[a-zA-Z0-9_-]+)/(?P<repo>[a-zA-Z0-9_.-]+)/(?:issue|pull)/(?:\d+)#(?P<type>issuecomment-|discussion_r)(?P<id>\d+)").unwrap();
             static ref SNIPPET_REGEX: Regex = Regex::new(r"https://github\.com/(?P<user>[a-zA-Z0-9_-]+)/(?P<repo>[a-zA-Z0-9_.-]+)/blob/(?P<file>[a-zA-Z0-9./_+() -]+)#L(?P<start>\d+)(?:-L(?P<end>\d+))?").unwrap();
         }
         let mut repos = join_all(
@@ -117,6 +118,33 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .map(|i| i.unwrap().to_string())
         .collect::<Vec<String>>();
 
+        let mut comments: Vec<String> = join_all(
+            COMMENT_REGEX
+                .captures_iter(&msg.content)
+                .map(|c| {
+                    (
+                        c.name("user").unwrap().as_str(),
+                        c.name("repo").unwrap().as_str(),
+                        if c.name("type").unwrap().as_str() == "issuecomment-" {
+                            "issues"
+                        } else {
+                            "pulls"
+                        },
+                        c.name("id").unwrap().as_str().parse().unwrap(),
+                    )
+                })
+                .collect::<HashSet<(&str, &str, &str, u32)>>()
+                .into_iter()
+                .map(|(user, repo, comment_type, id)| {
+                    state.get_comment(user, repo, comment_type, id)
+                }),
+        )
+        .await
+        .into_iter()
+        .filter(|i| i.is_ok())
+        .map(|i| i.unwrap().to_string())
+        .collect();
+
         let mut snippets: Vec<String> = join_all(
             SNIPPET_REGEX
                 .captures_iter(&msg.content)
@@ -143,6 +171,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let mut blocks = Vec::new();
         blocks.append(&mut repos);
         blocks.append(&mut issues);
+        blocks.append(&mut comments);
         blocks.append(&mut snippets);
 
         if !blocks.is_empty() {

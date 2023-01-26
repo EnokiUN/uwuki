@@ -10,7 +10,8 @@ pub const API_URL: &str = "https://api.github.com";
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct User {
-    pub login: String,
+    #[serde(rename = "login")]
+    pub name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -32,13 +33,31 @@ impl Display for Issue {
         writeln!(f, "Number:         #{}", self.number)?;
         writeln!(f, "State:          {}", self.state)?;
         writeln!(f, "Title:          {}", self.title)?;
-        writeln!(f, "Author:         {}", self.user.login)?;
+        writeln!(f, "Author:         {}", self.user.name)?;
         if self.comments > 0 {
             writeln!(f, "Comments:       {}", self.comments)?;
         }
         if let Some(body) = &self.body {
             writeln!(f, "Body:\n{}", body)?;
         }
+        write!(f, "```")
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Comment {
+    #[serde(rename = "html_url")]
+    pub url: String,
+    pub user: User,
+    pub body: String,
+}
+
+impl Display for Comment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "<{}>", self.url)?;
+        writeln!(f, "```")?;
+        writeln!(f, "[{}]:", self.user.name)?;
+        writeln!(f, "{}", self.body)?;
         write!(f, "```")
     }
 }
@@ -95,6 +114,13 @@ impl Display for Repository {
 pub trait GitHub {
     async fn get_issue(&self, user: &str, repository: &str, issue: u32) -> anyhow::Result<Issue>;
     async fn get_repo(&self, user: &str, repository: &str) -> anyhow::Result<Repository>;
+    async fn get_comment(
+        &self,
+        user: &str,
+        repository: &str,
+        comment_type: &str,
+        id: u32,
+    ) -> anyhow::Result<Comment>;
     async fn get_snippet(
         &self,
         user: &str,
@@ -129,6 +155,35 @@ impl GitHub for UwukiState {
         let builder = self
             .client
             .get(format!("{}/repos/{}/{}", API_URL, user, repository))
+            .header(USER_AGENT, "Uwuki (github.com/Enokiun)");
+        let builder = if let Some(token) = &self.github_token {
+            builder.bearer_auth(token)
+        } else {
+            builder
+        };
+        Ok(builder.send().await?.json().await?)
+    }
+
+    async fn get_comment(
+        &self,
+        user: &str,
+        repository: &str,
+        comment_type: &str,
+        id: u32,
+    ) -> anyhow::Result<Comment> {
+        log::debug!(
+            "Fetching {} comment {} from {}/{}",
+            comment_type,
+            id,
+            user,
+            repository
+        );
+        let builder = self
+            .client
+            .get(format!(
+                "{}/repos/{}/{}/{}/comments/{}",
+                API_URL, user, repository, comment_type, id
+            ))
             .header(USER_AGENT, "Uwuki (github.com/Enokiun)");
         let builder = if let Some(token) = &self.github_token {
             builder.bearer_auth(token)

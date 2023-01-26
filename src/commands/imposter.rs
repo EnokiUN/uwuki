@@ -16,10 +16,8 @@ pub async fn imposter(state: State, _: Message, args: Option<String>) -> Command
                 .await?;
         } else if content.is_empty() {
             state.send_message(author, "I am sus").await?;
-        } else {
-            if !content.starts_with(PREFIX) {
-                state.send_message(author, content).await?;
-            }
+        } else if !content.starts_with(PREFIX) {
+            state.send_message(author, content).await?;
         }
     }
 
