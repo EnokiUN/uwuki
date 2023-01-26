@@ -51,6 +51,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         } else if msg.content.trim().to_lowercase() == "!speed" {
             state.send("I am the faster.").await?;
             continue;
+        } else if msg.content.trim().to_lowercase() == "kys" {
+            state.send("Keep Yourself Safe*").await?;
+            continue;
         }
 
         if let Err(err) = commands.run_command(msg.clone()).await {
