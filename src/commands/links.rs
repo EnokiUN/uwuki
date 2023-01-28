@@ -77,3 +77,13 @@ pub async fn twitter(state: State, _: Message, _: Option<String>) -> CommandResu
 
     Ok(())
 }
+
+#[command]
+#[uwuki(description = "Sends the link Pengin, the official Eludris web client")]
+#[uwuki(alias = "pengin")]
+#[uwuki(usage = "client")]
+pub async fn client(state: State, _: Message, _: Option<String>) -> CommandResult {
+    state.send("https://elu.pages.dev").await?;
+
+    Ok(())
+}
