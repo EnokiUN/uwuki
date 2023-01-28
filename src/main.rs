@@ -54,6 +54,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         } else if msg.content.trim().to_lowercase() == "kys" {
             state.send("Keep Yourself Safe*").await?;
             continue;
+        } else if msg.content.trim().to_lowercase() == "rtfrb" {
+            state.send("Read The Fucking [Rust Book](https://doc.rust-lang.org/stable/book/)").await?;
+            continue;
         }
 
         if let Err(err) = commands.run_command(msg.clone()).await {
