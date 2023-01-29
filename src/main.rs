@@ -1,3 +1,5 @@
+#![allow(clippy::uninlined_format_args)]
+
 mod command_handler;
 mod commands;
 mod crates;
@@ -55,7 +57,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             state.send("Keep Yourself Safe*").await?;
             continue;
         } else if msg.content.trim().to_lowercase() == "rtfrb" {
-            state.send("Read The Fucking [Rust Book](https://doc.rust-lang.org/stable/book/)").await?;
+            state
+                .send("Read The Fucking [Rust Book](https://doc.rust-lang.org/stable/book/)")
+                .await?;
             continue;
         }
 
