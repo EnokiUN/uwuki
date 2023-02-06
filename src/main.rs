@@ -31,6 +31,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     env_logger::init();
 
     let mut client = HttpClient::new().name(NAME.to_string());
+    if let Ok(url) = env::var("INSTANCE_URL") {
+        client = client.rest_url(url);
+    }
     let gateway = client.create_gateway().await?;
 
     let state = Arc::new(UwukiState {
