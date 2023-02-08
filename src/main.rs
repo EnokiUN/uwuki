@@ -109,18 +109,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                     Some(name) => vec![(
                         name.as_str(),
                         c.name("repo").unwrap().as_str(),
-                        c.name("num").unwrap().as_str().parse().unwrap(),
+                        c.name("num").unwrap().as_str().parse().unwrap_or(0),
                     )],
                     None => vec![
                         (
                             "eludris",
                             c.name("repo").unwrap().as_str(),
-                            c.name("num").unwrap().as_str().parse().unwrap(),
+                            c.name("num").unwrap().as_str().parse().unwrap_or(0),
                         ),
                         (
                             "eludris-community",
                             c.name("repo").unwrap().as_str(),
-                            c.name("num").unwrap().as_str().parse().unwrap(),
+                            c.name("num").unwrap().as_str().parse().unwrap_or(0),
                         ),
                     ],
                 })
@@ -146,7 +146,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                         } else {
                             "pulls"
                         },
-                        c.name("id").unwrap().as_str().parse().unwrap(),
+                        c.name("id").unwrap().as_str().parse().unwrap_or(0),
                     )
                 })
                 .collect::<HashSet<(&str, &str, &str, u32)>>()
@@ -169,8 +169,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                         c.name("user").unwrap().as_str(),
                         c.name("repo").unwrap().as_str(),
                         c.name("file").unwrap().as_str(),
-                        c.name("start").unwrap().as_str().parse().unwrap(),
-                        c.name("end").map(|c| c.as_str().parse().unwrap()),
+                        c.name("start").unwrap().as_str().parse().unwrap_or(0),
+                        c.name("end").map(|c| c.as_str().parse().unwrap_or(0)),
                     )
                 })
                 .collect::<HashSet<(&str, &str, &str, u32, Option<u32>)>>()
