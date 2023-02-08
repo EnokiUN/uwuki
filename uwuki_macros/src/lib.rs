@@ -129,7 +129,7 @@ pub fn command(_: TokenStream, item: TokenStream) -> TokenStream {
             Box::pin(async move { #block })
         }
 
-        pub static #struct_name: #command_path<#state_path> = #command_path {
+        pub static #struct_name: #command_path<::std::sync::Arc<#state_path>> = #command_path {
             names: &[#name_str, #(#aliases),*],
             description: #description,
             usage: #usage,
