@@ -1,3 +1,4 @@
+mod apply;
 mod ban;
 mod crates;
 mod exec;
@@ -6,6 +7,9 @@ mod links;
 mod say;
 mod vtuber;
 
+use std::sync::Arc;
+
+use apply::APPLY_COMMAND;
 use ban::{BAN_COMMAND, BONK_COMMAND, UNBAN_COMMAND, UNBONK_COMMAND};
 use crates::CRATES_COMMAND;
 use exec::EXEC_COMMAND;
@@ -19,8 +23,9 @@ use vtuber::{STELLAR_COMMAND, WAA_COMMAND};
 
 use crate::{command_handler::Command, state::UwukiState};
 
-pub fn commands<'a>() -> Vec<Command<'a, UwukiState>> {
+pub fn commands<'a>() -> Vec<Command<'a, Arc<UwukiState>>> {
     vec![
+        APPLY_COMMAND.clone(),
         BAN_COMMAND.clone(),
         BONK_COMMAND.clone(),
         UNBAN_COMMAND.clone(),
