@@ -1324,6 +1324,7 @@ dependencies = [
  "futures",
  "lazy_static",
  "log",
+ "rand",
  "regex",
  "reqwest",
  "serde",

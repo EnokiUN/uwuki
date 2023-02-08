@@ -21,3 +21,4 @@ eludrs = { version = "0.3.2", git = "https://github.com/eludris-community/eludrs
 uwuki_macros = { path = "./uwuki_macros" }
 anyhow = "1.0.68"
 async-trait = "0.1.63"
+rand = "0.8.5"
