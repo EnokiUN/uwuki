@@ -14,12 +14,14 @@ use commands::commands;
 use eludrs::HttpClient;
 use futures::{future::join_all, stream::StreamExt};
 use lazy_static::lazy_static;
+use rand::SeedableRng;
 use regex::Regex;
 
 use command_handler::CommandRunner;
 use github::GitHub;
 use reqwest::Client;
 use state::UwukiState;
+use tokio::sync::Mutex;
 
 const PREFIX: &str = "uwu ";
 const HELP_INVOCATION: &str = "uwu help";
@@ -40,6 +42,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         http: client,
         client: Client::new(),
         github_token: env::var("GITHUB_TOKEN").ok(),
+        rng: Mutex::new(SeedableRng::from_entropy()),
     });
 
     let commands =

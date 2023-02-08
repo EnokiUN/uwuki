@@ -1,15 +1,18 @@
 use std::{error::Error, fmt::Display, sync::Arc};
 
 use eludrs::{todel::Message, HttpClient};
+use rand::rngs::StdRng;
 use reqwest::Client;
+use tokio::sync::Mutex;
 
 pub type State = Arc<UwukiState>;
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct UwukiState {
     pub http: HttpClient,
     pub client: Client,
     pub github_token: Option<String>,
+    pub rng: Mutex<StdRng>,
 }
 
 impl UwukiState {
