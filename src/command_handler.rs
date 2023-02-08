@@ -31,7 +31,7 @@ pub struct CommandRunner<'a, S: Debug + Send + Sync> {
     lookup: HashMap<&'a str, usize>,
 }
 
-impl<'a, S: Debug + Send + Sync + Clone> CommandRunner<'a, S> {
+impl<'a, S: Debug + Send + Sync> CommandRunner<'a, S> {
     pub fn new(prefix: String, state: Arc<S>) -> Self {
         Self {
             prefix,
@@ -41,7 +41,7 @@ impl<'a, S: Debug + Send + Sync + Clone> CommandRunner<'a, S> {
         }
     }
 
-    pub fn add_command(&mut self, command: Command<'a, S>) {
+    pub fn add_command(&mut self, command: Command<'a, Arc<S>>) {
         for name in command.names {
             self.lookup.insert(name, self.commands.len());
         }
@@ -49,12 +49,12 @@ impl<'a, S: Debug + Send + Sync + Clone> CommandRunner<'a, S> {
     }
 
     #[allow(dead_code)]
-    pub fn command(mut self, command: Command<'a, S>) -> Self {
+    pub fn command(mut self, command: Command<'a, Arc<S>>) -> Self {
         self.add_command(command);
         self
     }
 
-    pub fn commands(mut self, commands: &[Command<'a, S>]) -> Self {
+    pub fn commands(mut self, commands: &[Command<'a, Arc<S>>]) -> Self {
         for command in commands.iter().cloned() {
             self.add_command(command);
         }
@@ -67,11 +67,11 @@ impl<'a, S: Debug + Send + Sync + Clone> CommandRunner<'a, S> {
         self
     }
 
-    pub fn get_commands(&self) -> &Vec<Command<'a, S>> {
+    pub fn get_commands(&self) -> &Vec<Command<'a, Arc<S>>> {
         &self.commands
     }
 
-    pub fn get_command(&self, name: &str) -> Option<&Command<'a, S>> {
+    pub fn get_command(&self, name: &str) -> Option<&Command<'a, Arc<S>>> {
         let index = self.lookup.get(name)?;
         self.commands.get(*index)
     }
