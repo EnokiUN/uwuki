@@ -10,7 +10,7 @@ pub struct Command<'a, S: Debug + Send + Sync + Clone> {
     pub names: &'a [&'a str],
     pub description: &'a str,
     pub usage: &'a str,
-    pub func: fn(Arc<S>, Message, Option<String>) -> BoxFuture<'a, CommandResult>,
+    pub func: fn(S, Message, Option<String>) -> BoxFuture<'a, CommandResult>,
 }
 
 impl<'a, S: Debug + Send + Sync + Clone> Debug for Command<'a, S> {
@@ -23,10 +23,10 @@ impl<'a, S: Debug + Send + Sync + Clone> Debug for Command<'a, S> {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct CommandRunner<'a, S: Debug + Send + Sync + Clone> {
+#[derive(Debug)]
+pub struct CommandRunner<'a, S: Debug + Send + Sync> {
     prefix: String,
-    commands: Vec<Command<'a, S>>,
+    commands: Vec<Command<'a, Arc<S>>>,
     state: Arc<S>,
     lookup: HashMap<&'a str, usize>,
 }
