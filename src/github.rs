@@ -38,7 +38,7 @@ impl Display for Issue {
             writeln!(f, "Comments:       {}", self.comments)?;
         }
         if let Some(body) = &self.body {
-            writeln!(f, "Body:\n{}", body)?;
+            writeln!(f, "Body:\n{}", body.replace("```", "`\u{200e}`\u{200e}`"))?;
         }
         write!(f, "```")
     }
@@ -57,7 +57,7 @@ impl Display for Comment {
         writeln!(f, "<{}>", self.url)?;
         writeln!(f, "```")?;
         writeln!(f, "[{}]:", self.user.name)?;
-        writeln!(f, "{}", self.body)?;
+        writeln!(f, "{}", self.body.replace("```", "`\u{200e}`\u{200e}`"))?;
         write!(f, "```")
     }
 }
@@ -94,7 +94,11 @@ impl Display for Repository {
             }
         }
         if let Some(description) = &self.description {
-            writeln!(f, "Description:    {}", description)?;
+            writeln!(
+                f,
+                "Description:    {}",
+                description.replace("```", "`\u{200e}`\u{200e}`")
+            )?;
         }
         writeln!(f, "Stars:          {}", self.stars)?;
         if self.issues > 0 {
