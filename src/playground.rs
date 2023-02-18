@@ -51,8 +51,16 @@ pub struct PlaygroundResponse {
 
 impl Display for PlaygroundResponse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Stderr:\n```\n{}```\n", self.stderr)?;
-        write!(f, "Stdout:\n```\n{}```\n", self.stdout)
+        write!(
+            f,
+            "Stderr:\n```\n{}```\n",
+            self.stderr.replace("```", "`\u{200e}`\u{200e}`")
+        )?;
+        write!(
+            f,
+            "Stdout:\n```\n{}```\n",
+            self.stdout.replace("```", "`\u{200e}`\u{200e}`")
+        )
     }
 }
 
