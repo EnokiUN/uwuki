@@ -10,8 +10,8 @@ use crate::{
 };
 
 #[command]
-#[uwuki(description = "Says what you need to say")]
-#[uwuki(usage = "say <shit here>")]
+#[uwuki(description = "Runs some rust code")]
+#[uwuki(usage = "exec <code>")]
 pub async fn exec(state: State, _: Message, args: Option<String>) -> CommandResult {
     lazy_static! {
         static ref CODE_REGEX: Regex =
