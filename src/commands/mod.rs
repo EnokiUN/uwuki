@@ -1,6 +1,7 @@
 mod apply;
 mod ban;
 mod crates;
+mod define;
 mod exec;
 mod imposter;
 mod links;
@@ -12,6 +13,7 @@ use std::sync::Arc;
 use apply::APPLY_COMMAND;
 use ban::{BAN_COMMAND, BONK_COMMAND, UNBAN_COMMAND, UNBONK_COMMAND};
 use crates::CRATES_COMMAND;
+use define::DEFINE_COMMAND;
 use exec::EXEC_COMMAND;
 use imposter::IMPOSTER_COMMAND;
 use links::{
@@ -31,6 +33,7 @@ pub fn commands<'a>() -> Vec<Command<'a, Arc<UwukiState>>> {
         UNBAN_COMMAND.clone(),
         UNBONK_COMMAND.clone(),
         CRATES_COMMAND.clone(),
+        DEFINE_COMMAND.clone(),
         EXEC_COMMAND.clone(),
         IMPOSTER_COMMAND.clone(),
         AWESOME_COMMAND.clone(),
