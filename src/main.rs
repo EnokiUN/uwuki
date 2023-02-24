@@ -6,6 +6,7 @@ mod crates;
 mod github;
 mod playground;
 mod state;
+mod urban_dictionary;
 mod utils;
 
 use std::{collections::HashSet, env, sync::Arc};
