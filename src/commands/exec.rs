@@ -1,4 +1,6 @@
 use eludrs::todel::Message;
+use lazy_static::lazy_static;
+use regex::Regex;
 use uwuki_macros::command;
 
 use crate::{
@@ -11,12 +13,22 @@ use crate::{
 #[uwuki(description = "Says what you need to say")]
 #[uwuki(usage = "say <shit here>")]
 pub async fn exec(state: State, _: Message, args: Option<String>) -> CommandResult {
+    lazy_static! {
+        static ref CODE_REGEX: Regex =
+            Regex::new(r"(?:```(?:rs|rust)?\n?)?(?P<code>.+)\n?(?:```)?").unwrap();
+    };
     if let Some(code) = args {
         state
             .send(
                 state
                     .execute(PlaygroundRequest::new(
-                        code.replace("```rs", "").replace("```", "").to_string(),
+                        CODE_REGEX
+                            .captures(&code)
+                            .unwrap()
+                            .name("code")
+                            .unwrap()
+                            .as_str()
+                            .to_string(),
                     ))
                     .await?
                     .to_string(),

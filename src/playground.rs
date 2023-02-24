@@ -36,6 +36,11 @@ impl Default for PlaygroundRequest {
 impl PlaygroundRequest {
     pub fn new(code: String) -> Self {
         Self {
+            crate_type: if code.contains("fn main") {
+                "bin".to_string()
+            } else {
+                "lib".to_string()
+            },
             code,
             ..Default::default()
         }
