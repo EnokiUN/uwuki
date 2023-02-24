@@ -7,8 +7,7 @@ use crate::{command_handler::CommandResult, state::State, utils::get_arg, PREFIX
 #[uwuki(description = "Imposters your imposter")]
 #[uwuki(usage = "imposter <author> <content> | imposter <content>")]
 pub async fn imposter(state: State, _: Message, args: Option<String>) -> CommandResult {
-    if let Some(args) = args {
-        let mut content = args.to_string();
+    if let Some(mut content) = args {
         let author = get_arg(&mut content);
         if author.len() < 2 || author.len() > 32 {
             state
