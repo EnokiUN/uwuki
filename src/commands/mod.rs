@@ -1,3 +1,4 @@
+mod amendments;
 mod apply;
 mod ban;
 mod crates;
@@ -10,6 +11,7 @@ mod vtuber;
 
 use std::sync::Arc;
 
+use amendments::AMENDMENT_COMMAND;
 use apply::APPLY_COMMAND;
 use ban::{BAN_COMMAND, BONK_COMMAND, UNBAN_COMMAND, UNBONK_COMMAND};
 use crates::CRATES_COMMAND;
@@ -27,6 +29,7 @@ use crate::{command_handler::Command, state::UwukiState};
 
 pub fn commands<'a>() -> Vec<Command<'a, Arc<UwukiState>>> {
     vec![
+        AMENDMENT_COMMAND.clone(),
         APPLY_COMMAND.clone(),
         BAN_COMMAND.clone(),
         BONK_COMMAND.clone(),
