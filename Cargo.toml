@@ -16,7 +16,7 @@ regex = "1.6.0"
 reqwest = { version = "0.11.11", default-features = false, features = ["json", "rustls-tls"] }
 serde = { version = "1.0.144", features = ["derive"] }
 serde_json = "1.0.85"
-tokio = { version = "1.21.1", features = ["rt-multi-thread", "macros"] }
+tokio = { version = "1.21.1", features = ["rt-multi-thread", "macros", "fs"] }
 eludrs = { version = "0.3.2", git = "https://github.com/eludris-community/eludrs" }
 uwuki_macros = { path = "./uwuki_macros" }
 anyhow = "1.0.68"
