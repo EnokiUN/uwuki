@@ -6,6 +6,7 @@ mod define;
 mod exec;
 mod imposter;
 mod links;
+mod pls;
 mod say;
 mod vtuber;
 
@@ -22,6 +23,7 @@ use links::{
     AWESOME_COMMAND, BLOG_COMMAND, CLIENT_COMMAND, COMMUNITY_COMMAND, DOCS_COMMAND, GITHUB_COMMAND,
     INFO_COMMAND, REDDIT_COMMAND, TWITTER_COMMAND,
 };
+use pls::PLS_COMMAND;
 use say::SAY_COMMAND;
 use vtuber::{STELLAR_COMMAND, WAA_COMMAND};
 
@@ -48,6 +50,7 @@ pub fn commands<'a>() -> Vec<Command<'a, Arc<UwukiState>>> {
         INFO_COMMAND.clone(),
         REDDIT_COMMAND.clone(),
         TWITTER_COMMAND.clone(),
+        PLS_COMMAND.clone(),
         SAY_COMMAND.clone(),
         WAA_COMMAND.clone(),
         STELLAR_COMMAND.clone(),
