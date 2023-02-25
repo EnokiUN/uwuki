@@ -6,7 +6,7 @@ use crate::{
 };
 
 #[command]
-#[uwuki(description = "")]
+#[uwuki(description = "Provides the definition of a term")]
 #[uwuki(alias = "ud")]
 #[uwuki(usage = "define <term> [page=1]")]
 pub async fn define(state: State, _: Message, args: Option<String>) -> CommandResult {
