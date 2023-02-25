@@ -1,6 +1,8 @@
 use std::fmt::Display;
 
 use async_trait::async_trait;
+use lazy_static::lazy_static;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 use crate::state::UwukiState;
@@ -19,9 +21,16 @@ pub struct Definition {
 
 impl Display for Definition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        lazy_static! {
+            static ref LINK_REGEX: Regex = Regex::new(r"\[(?P<term>.+?)\]").unwrap();
+        };
         writeln!(f, "__{}__", self.word)?;
-        writeln!(f, "{}\n", self.definition)?;
-        writeln!(f, "Example:\n{}\n", self.example)?;
+        writeln!(f, "{}\n", LINK_REGEX.replace_all(&self.definition, "$term"))?;
+        writeln!(
+            f,
+            "Example:\n{}\n",
+            LINK_REGEX.replace_all(&self.example, "$term")
+        )?;
         write!(
             f,
             "By {} - {} points",
