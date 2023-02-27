@@ -12,11 +12,11 @@ pub const API_URL: &str = "https://api.urbandictionary.com/v0";
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Definition {
     definition: String,
-    thumbs_up: u32,
+    thumbs_up: i32,
     author: String,
     word: String,
     example: String,
-    thumbs_down: u32,
+    thumbs_down: i32,
 }
 
 impl Display for Definition {
