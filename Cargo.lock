@@ -274,7 +274,7 @@ dependencies = [
 [[package]]
 name = "eludrs"
 version = "0.3.2"
-source = "git+https://github.com/eludris-community/eludrs#befecc436ff3c558f179bcd6b3b8876a5e309969"
+source = "git+https://github.com/eludris-community/eludrs#b05421134950be073a39cb091827016a49ad9ee8"
 dependencies = [
  "anyhow",
  "futures",
@@ -1116,7 +1116,7 @@ checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
 [[package]]
 name = "todel"
 version = "0.3.2"
-source = "git+https://github.com/eludris/eludris#931305f64d9ea4eb7d879ac519a0a0924eecaa2c"
+source = "git+https://github.com/eludris/eludris#fa8bb43813a14667b443ef92f226c5bfd65faaca"
 dependencies = [
  "serde",
  "serde_with",
