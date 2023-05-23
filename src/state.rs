@@ -1,5 +1,6 @@
-use std::{error::Error, fmt::Display, sync::Arc};
+use std::{fmt::Display, sync::Arc};
 
+use anyhow::Result;
 use eludrs::{todel::Message, HttpClient};
 use rand::rngs::StdRng;
 use reqwest::Client;
@@ -16,10 +17,7 @@ pub struct UwukiState {
 }
 
 impl UwukiState {
-    pub async fn send(
-        &self,
-        content: impl Display,
-    ) -> Result<Message, Box<dyn Error + Send + Sync>> {
+    pub async fn send(&self, content: impl Display) -> Result<Message> {
         self.http.send(content).await
     }
 
@@ -27,7 +25,7 @@ impl UwukiState {
         &self,
         author: impl Display,
         content: impl Display,
-    ) -> Result<Message, Box<dyn Error + Send + Sync>> {
+    ) -> Result<Message> {
         self.http.send_message(author, content).await
     }
 }
