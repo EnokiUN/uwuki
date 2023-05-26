@@ -134,11 +134,12 @@ checksum = "1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b"
 [[package]]
 name = "eludrs"
 version = "0.3.3"
-source = "git+https://github.com/eludris-community/eludrs#6f7b8f25d090530a60dc0004176254629ee47aad"
+source = "git+https://github.com/eludris-community/eludrs#494696b94ff5f65259df33acf7056731b292ae65"
 dependencies = [
  "anyhow",
  "futures",
  "log",
+ "rand",
  "reqwest",
  "serde",
  "serde_json",
