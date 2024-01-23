@@ -4,7 +4,7 @@ mod ban;
 mod crates;
 mod define;
 mod exec;
-mod imposter;
+// mod imposter;
 mod links;
 mod pls;
 mod say;
@@ -18,7 +18,7 @@ use ban::{BAN_COMMAND, BONK_COMMAND, UNBAN_COMMAND, UNBONK_COMMAND};
 use crates::CRATES_COMMAND;
 use define::DEFINE_COMMAND;
 use exec::EXEC_COMMAND;
-use imposter::IMPOSTER_COMMAND;
+// use imposter::IMPOSTER_COMMAND;
 use links::{
     AWESOME_COMMAND, BLOG_COMMAND, CLIENT_COMMAND, COMMUNITY_COMMAND, DOCS_COMMAND, GITHUB_COMMAND,
     INFO_COMMAND, REDDIT_COMMAND, TWITTER_COMMAND,
@@ -40,7 +40,7 @@ pub fn commands<'a>() -> Vec<Command<'a, Arc<UwukiState>>> {
         CRATES_COMMAND.clone(),
         DEFINE_COMMAND.clone(),
         EXEC_COMMAND.clone(),
-        IMPOSTER_COMMAND.clone(),
+        // IMPOSTER_COMMAND.clone(),
         AWESOME_COMMAND.clone(),
         BLOG_COMMAND.clone(),
         CLIENT_COMMAND.clone(),

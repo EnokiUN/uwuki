@@ -76,15 +76,18 @@ impl<'a, S: Debug + Send + Sync> CommandRunner<'a, S> {
         self.commands.get(*index)
     }
 
-    pub async fn run_command(&self, message: Message) -> CommandResult {
-        if message.content.starts_with(&self.prefix) {
-            let (command, args) = message.content[self.prefix.len()..]
+    pub async fn run_command(&self, message_event: Message) -> CommandResult {
+        if message_event.message.content.starts_with(&self.prefix) {
+            let (command, args) = message_event.message.content[self.prefix.len()..]
                 .split_once([' ', '\n'])
                 .map(|(cmd, args)| (cmd, Some(args.to_string())))
-                .unwrap_or((message.content[self.prefix.len()..].trim(), None));
+                .unwrap_or((
+                    message_event.message.content[self.prefix.len()..].trim(),
+                    None,
+                ));
             if let Some(index) = self.lookup.get(command) {
                 if let Some(command) = self.commands.get(*index) {
-                    (command.func)(Arc::clone(&self.state), message, args).await?;
+                    (command.func)(Arc::clone(&self.state), message_event, args).await?;
                 }
             }
         }

@@ -18,14 +18,6 @@ pub struct UwukiState {
 
 impl UwukiState {
     pub async fn send(&self, content: impl Display) -> Result<Message> {
-        self.http.send(content).await
-    }
-
-    pub async fn send_message(
-        &self,
-        author: impl Display,
-        content: impl Display,
-    ) -> Result<Message> {
-        self.http.send_message(author, content).await
+        self.http.send_message(content).await
     }
 }
