@@ -1,4 +1,4 @@
-use eludrs::todel::Message;
+use eludrs::models::Message;
 use rand::seq::SliceRandom;
 use uwuki_macros::command;
 
@@ -22,22 +22,25 @@ pub async fn apply(state: State, msg: Message, args: Option<String>) -> CommandR
         let thing = get_arg(&mut content);
         if content.is_empty() {
             state
-                .send(format!(
+                .send(msg.channel.get_id(), format!(
                     "**{}** used **{}** on **themselves** like an idiot and then **fricking imploded uwu**",
                     msg.author, thing
                 ))
                 .await?;
         } else {
             state
-                .send(format!(
-                    "**{}** used **{}** on **{}**.\n\n{}",
-                    msg.author,
-                    thing,
-                    content,
-                    OUTCOMES
-                        .choose(&mut *state.rng.lock().await)
-                        .unwrap_or(&OUTCOMES[0])
-                ))
+                .send(
+                    msg.channel.get_id(),
+                    format!(
+                        "**{}** used **{}** on **{}**.\n\n{}",
+                        msg.author,
+                        thing,
+                        content,
+                        OUTCOMES
+                            .choose(&mut *state.rng.lock().await)
+                            .unwrap_or(&OUTCOMES[0])
+                    ),
+                )
                 .await?;
         }
     }

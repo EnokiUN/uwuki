@@ -1,6 +1,6 @@
 use std::{collections::HashMap, fmt::Debug, sync::Arc};
 
-use eludrs::todel::Message;
+use eludrs::todel::models::Message;
 use futures::future::BoxFuture;
 
 pub type CommandResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
@@ -13,7 +13,7 @@ pub struct Command<'a, S: Debug + Send + Sync + Clone> {
     pub func: fn(S, Message, Option<String>) -> BoxFuture<'a, CommandResult>,
 }
 
-impl<'a, S: Debug + Send + Sync + Clone> Debug for Command<'a, S> {
+impl<S: Debug + Send + Sync + Clone> Debug for Command<'_, S> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Command")
             .field("names", &self.names)
@@ -77,14 +77,15 @@ impl<'a, S: Debug + Send + Sync> CommandRunner<'a, S> {
     }
 
     pub async fn run_command(&self, message_event: Message) -> CommandResult {
-        if message_event.message.content.starts_with(&self.prefix) {
-            let (command, args) = message_event.message.content[self.prefix.len()..]
+        let content = match message_event.content {
+            Some(ref content) => content.trim(),
+            None => return Ok(()),
+        };
+        if content.starts_with(&self.prefix) {
+            let (command, args) = content[self.prefix.len()..]
                 .split_once([' ', '\n'])
                 .map(|(cmd, args)| (cmd, Some(args.to_string())))
-                .unwrap_or((
-                    message_event.message.content[self.prefix.len()..].trim(),
-                    None,
-                ));
+                .unwrap_or((content[self.prefix.len()..].trim(), None));
             if let Some(index) = self.lookup.get(command) {
                 if let Some(command) = self.commands.get(*index) {
                     (command.func)(Arc::clone(&self.state), message_event, args).await?;

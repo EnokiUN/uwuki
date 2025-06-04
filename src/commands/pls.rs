@@ -1,4 +1,4 @@
-use eludrs::todel::Message;
+use eludrs::models::Message;
 use uwuki_macros::command;
 
 use crate::{command_handler::CommandResult, state::State};
@@ -6,9 +6,9 @@ use crate::{command_handler::CommandResult, state::State};
 #[command]
 #[uwuki(description = "Begs uwuki for something")]
 #[uwuki(usage = "pls <stuff here>")]
-pub async fn pls(state: State, _: Message, args: Option<String>) -> CommandResult {
+pub async fn pls(state: State, msg: Message, args: Option<String>) -> CommandResult {
     if args.is_some() {
-        state.send("no lol").await?;
+        state.send(msg.channel.get_id(), "no lol").await?;
     }
 
     Ok(())

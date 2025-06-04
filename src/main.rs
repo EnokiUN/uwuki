@@ -55,28 +55,40 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let mut events = gateway.get_events().await?;
 
     while let Some(event) = events.next().await {
-        if let Event::Message(mut msg) = event {
+        if let Event::Message(msg) = event {
+            let mut content = match msg.content {
+                Some(ref content) => content.trim().to_string(),
+                None => continue,
+            };
             if msg.author.username == NAME {
                 continue;
-            } else if msg.message.content.trim().to_lowercase() == "uwu" {
-                state.send("UwU").await?;
+            } else if content.to_lowercase() == "uwu" {
+                state.send(msg.channel.get_id(), "UwU").await?;
                 continue;
-            } else if msg.message.content.trim().to_lowercase() == "!speed" {
-                state.send("I am the faster.").await?;
+            } else if content.to_lowercase() == "!speed" {
+                state.send(msg.channel.get_id(), "I am the faster.").await?;
                 continue;
-            } else if msg.message.content.trim().to_lowercase() == "kys" {
-                state.send("Keep Yourself Safe*").await?;
-                continue;
-            } else if msg.message.content.trim().to_lowercase() == "rtfrb" {
+            } else if content.to_lowercase() == "kys" {
                 state
-                    .send("Read The Fucking [Rust Book](https://doc.rust-lang.org/stable/book/)")
+                    .send(msg.channel.get_id(), "Keep Yourself Safe*")
+                    .await?;
+                continue;
+            } else if content.to_lowercase() == "rtfrb" {
+                state
+                    .send(
+                        msg.channel.get_id(),
+                        "Read The Fucking [Rust Book](https://doc.rust-lang.org/stable/book/)",
+                    )
                     .await?;
                 continue;
             }
 
             if let Err(err) = commands.run_command(msg.clone()).await {
                 state
-                    .send(format!("You're bad, you broke me :( ({:?})", err))
+                    .send(
+                        msg.channel.get_id(),
+                        format!("You're bad, you broke me :( ({:?})", err),
+                    )
                     .await
                     .ok();
             }
@@ -89,7 +101,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             }
             let mut repos = join_all(
                 REPO_REGEX
-                    .captures_iter(&msg.message.content)
+                    .captures_iter(&content)
                     .filter(|c| c.name("ignore").is_none())
                     .map(|c| {
                         (
@@ -109,7 +121,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
             let mut issues = join_all(
                 ISSUE_REGEX
-                    .captures_iter(&msg.message.content)
+                    .captures_iter(&content)
                     .flat_map(|c| match c.name("user") {
                         Some(name) => vec![(
                             name.as_str(),
@@ -141,7 +153,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
             let mut comments: Vec<String> = join_all(
                 COMMENT_REGEX
-                    .captures_iter(&msg.message.content)
+                    .captures_iter(&content)
                     .map(|c| {
                         (
                             c.name("user").unwrap().as_str(),
@@ -168,7 +180,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
             let mut snippets: Vec<String> = join_all(
                 SNIPPET_REGEX
-                    .captures_iter(&msg.message.content)
+                    .captures_iter(&content)
                     .map(|c| {
                         (
                             c.name("user").unwrap().as_str(),
@@ -198,40 +210,50 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             if !blocks.is_empty() {
                 let content = blocks.join("\n");
                 if content.len() > 2000 {
-                    state.send("Content too long uwu but sad").await?;
-                } else {
-                    state.send(content).await?;
-                }
-            } else if msg.message.content.starts_with(HELP_INVOCATION) {
-                msg.message.content.drain(..HELP_INVOCATION.len());
-                if msg.message.content.is_empty() {
                     state
-                        .send(format!(
-                            "```\nHelp:\n{}\n\nuwu > owo\n```",
-                            commands
-                                .get_commands()
-                                .iter()
-                                .map(|c| format!(
-                                    "{:<15} {}",
-                                    format!("{}:", c.names[0]),
-                                    c.description
-                                ))
-                                .collect::<Vec<String>>()
-                                .join("\n")
-                        ))
+                        .send(msg.channel.get_id(), "Content too long uwu but sad")
                         .await?;
                 } else {
-                    match commands.get_command(msg.message.content.trim()) {
+                    state.send(msg.channel.get_id(), content).await?;
+                }
+            } else if content.starts_with(HELP_INVOCATION) {
+                content.drain(..HELP_INVOCATION.len());
+                if content.is_empty() {
+                    state
+                        .send(
+                            msg.channel.get_id(),
+                            format!(
+                                "```\nHelp:\n{}\n\nuwu > owo\n```",
+                                commands
+                                    .get_commands()
+                                    .iter()
+                                    .map(|c| format!(
+                                        "{:<15} {}",
+                                        format!("{}:", c.names[0]),
+                                        c.description
+                                    ))
+                                    .collect::<Vec<String>>()
+                                    .join("\n")
+                            ),
+                        )
+                        .await?;
+                } else {
+                    match commands.get_command(content.trim()) {
                         Some(command) => {
                             state
-                                .send(format!(
-                                    "```\n__{}__\n{}\n\n{}\n```",
-                                    command.names[0], command.description, command.usage
-                                ))
+                                .send(
+                                    msg.channel.get_id(),
+                                    format!(
+                                        "```\n__{}__\n{}\n\n{}\n```",
+                                        command.names[0], command.description, command.usage
+                                    ),
+                                )
                                 .await?;
                         }
                         None => {
-                            state.send("Could not find that command, L? >~<").await?;
+                            state
+                                .send(msg.channel.get_id(), "Could not find that command, L? >~<")
+                                .await?;
                         }
                     }
                 };

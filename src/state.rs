@@ -1,7 +1,7 @@
 use std::{fmt::Display, sync::Arc};
 
 use anyhow::Result;
-use eludrs::{todel::Message, HttpClient};
+use eludrs::{todel::models::Message, HttpClient};
 use rand::rngs::StdRng;
 use reqwest::Client;
 use tokio::sync::Mutex;
@@ -17,7 +17,7 @@ pub struct UwukiState {
 }
 
 impl UwukiState {
-    pub async fn send(&self, content: impl Display) -> Result<Message> {
-        self.http.send_message(content).await
+    pub async fn send(&self, channel_id: u64, content: impl Display) -> Result<Message> {
+        self.http.send_message(channel_id, content).await
     }
 }
