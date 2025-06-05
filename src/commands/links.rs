@@ -8,7 +8,7 @@ use crate::{command_handler::CommandResult, state::State};
 #[uwuki(usage = "info")]
 pub async fn info(state: State, msg: Message, _: Option<String>) -> CommandResult {
     state
-        .send(msg.channel.get_id(), "<https://eludris.pages.dev>")
+        .send(msg.channel.get_id(), "<https://eludris.com>")
         .await?;
 
     Ok(())
@@ -19,7 +19,7 @@ pub async fn info(state: State, msg: Message, _: Option<String>) -> CommandResul
 #[uwuki(usage = "blog")]
 pub async fn blog(state: State, msg: Message, _: Option<String>) -> CommandResult {
     state
-        .send(msg.channel.get_id(), "<https://eludris.pages.dev/blog>")
+        .send(msg.channel.get_id(), "<https://eludris.com/blog>")
         .await?;
 
     Ok(())
@@ -30,7 +30,7 @@ pub async fn blog(state: State, msg: Message, _: Option<String>) -> CommandResul
 #[uwuki(usage = "docs")]
 pub async fn docs(state: State, msg: Message, _: Option<String>) -> CommandResult {
     state
-        .send(msg.channel.get_id(), "https://eludris.github.io/docs")
+        .send(msg.channel.get_id(), "https://devs.eludris.com")
         .await?;
 
     Ok(())
@@ -98,12 +98,11 @@ pub async fn twitter(state: State, msg: Message, _: Option<String>) -> CommandRe
 }
 
 #[command]
-#[uwuki(description = "Sends the link Pengin, the official Eludris web client")]
-#[uwuki(alias = "pengin")]
+#[uwuki(description = "Sends the link to the official Eludris web client")]
 #[uwuki(usage = "client")]
 pub async fn client(state: State, msg: Message, _: Option<String>) -> CommandResult {
     state
-        .send(msg.channel.get_id(), "https://elu.pages.dev")
+        .send(msg.channel.get_id(), "https://app.eludris.com")
         .await?;
 
     Ok(())
